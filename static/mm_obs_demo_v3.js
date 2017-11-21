@@ -57,9 +57,14 @@ var drawMap = function(obs) {
   var offsetX = canvasOffset.left;
   var offsetY = canvasOffset.top;
   var touched = false;
+  function ttHide() {
+    ttCanvas.style.left = "-800px";
+  }
   $("#mapCanvas").mousemove(function(e) {
-    if (touched)
+    if (touched) {
+      ttHide();
       return;
+    }
     var mouseX = parseInt(e.clientX - offsetX);
     var mouseY = parseInt(e.clientY - offsetY);
     var hit = false;
@@ -83,15 +88,15 @@ var drawMap = function(obs) {
         hit = true;
       }
     }
-    if (!hit) {
-      ttCanvas.style.left = "-800px";
-    }
+    if (!hit)
+      ttHide();
   });
 
   /* touching is a way for mobile device users to get around the fact that
      they can't hover. */
-  var handleTouch = function(e) {
+  function handleTouch(e) {
     touched = true;
+    ttHide();
     e.preventDefault();
     var mouseX = parseInt(e.targetTouches[0].clientX - offsetX);
     var mouseY = parseInt(e.targetTouches[0].clientY - offsetY);
