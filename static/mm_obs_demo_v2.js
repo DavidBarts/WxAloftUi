@@ -20,17 +20,15 @@ var drawMap = function(obs) {
 
   /* make text to pretty-print a single field value */
   function listIt(name, value, suffix) {
-    var nl = (arguments.length == 4 && !arguments[3]) ? "" : "\n";
     if (value == null)
-      return name + ": (missing)" + nl;
+      return name + ": (missing)";
     else
-      return name + ": " + value + suffix + nl;
+      return name + ": " + value + suffix;
   }
 
   /* printing multi-line messages. see:
      http://junerockwell.com/end-of-line-or-line-break-in-html5-canvas/ */
-  function multiLineText(ctx, message) {
-      var msgs = message.split("\n");
+  function multiLineText(ctx, msgs) {
       var fontSize = parseInt(window.getComputedStyle(ctx.canvas, null).getPropertyValue("font-size"));
       var yIncr = Math.round(fontSize * 1.1);
       var numLines = Math.min(Math.trunc(ctx.canvas.height/yIncr), msgs.length);
@@ -58,7 +56,9 @@ var drawMap = function(obs) {
   var canvasOffset = $("#mapCanvas").offset();
   var offsetX = canvasOffset.left;
   var offsetY = canvasOffset.top;
+  var hovered = false;
   $("#mapCanvas").mousemove(function(e) {
+    hovered = true;
     var mouseX = parseInt(e.clientX - offsetX);
     var mouseY = parseInt(e.clientY - offsetY);
     var hit = false;
@@ -70,14 +70,14 @@ var drawMap = function(obs) {
         ttCanvas.style.left = (dot.x) + "px";
         ttCanvas.style.top = (dot.y + 20) + "px";
         ttCtx.clearRect(0, 0, ttCanvas.width, ttCanvas.height);
-        var message = listIt("Temperature", obs[i].temperature, "°C") +
-          listIt("Altitude", obs[i].altitude, " ft") +
-          listIt("Wind direction", obs[i].wind_dir, "°") +
-          listIt("Wind speed", obs[i].wind_speed, " kts") +
-          listIt("Time observed", obs[i].observed, "") +
-          listIt("Time received", obs[i].received, "") +
-          listIt("Frequency", obs[i].frequency, " MHz") +
-          listIt("Source", obs[i].source, "", false);
+        var message = [ listIt("Temperature", obs[i].temperature, "°C"),
+          listIt("Altitude", obs[i].altitude, " ft"),
+          listIt("Wind direction", obs[i].wind_dir, "°"),
+          listIt("Wind speed", obs[i].wind_speed, " kn"),
+          listIt("Time observed", obs[i].observed, ""),
+          listIt("Time received", obs[i].received, ""),
+          listIt("Frequency", obs[i].frequency, " MHz"),
+          listIt("Source", obs[i].source, "") ];
         multiLineText(ttCtx, message);
         hit = true;
       }
