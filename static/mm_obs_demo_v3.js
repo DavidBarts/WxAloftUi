@@ -56,9 +56,10 @@ var drawMap = function(obs) {
   var canvasOffset = $("#mapCanvas").offset();
   var offsetX = canvasOffset.left;
   var offsetY = canvasOffset.top;
-  var hovered = false;
+  var touched = false;
   $("#mapCanvas").mousemove(function(e) {
-    hovered = true;
+    if (touched)
+      return;
     var mouseX = parseInt(e.clientX - offsetX);
     var mouseY = parseInt(e.clientY - offsetY);
     var hit = false;
@@ -90,8 +91,7 @@ var drawMap = function(obs) {
   /* touching is a way for mobile device users to get around the fact that
      they can't hover. */
   var handleTouch = function(e) {
-    if (hovered)
-      return;
+    touched = true;
     e.preventDefault();
     var mouseX = parseInt(e.targetTouches[0].clientX - offsetX);
     var mouseY = parseInt(e.targetTouches[0].clientY - offsetY);
