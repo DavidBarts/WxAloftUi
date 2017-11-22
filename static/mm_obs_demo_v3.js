@@ -1,6 +1,8 @@
 var drawMap = function(obs) {
   var RADIUS = 4;  /* radius of the dots we draw */
+  var TRADIUS = 12;  /* touch sensitivity radius */
   var rsquared = RADIUS * RADIUS;
+  var trsquared = TRADIUS * TRADIUS;
   var provider = new com.modestmaps.TemplatedLayer('http://tile.openstreetmap.org/{Z}/{X}/{Y}.png');
   var map = new com.modestmaps.Map('map', provider);
   var canvas = document.createElement('canvas');
@@ -100,12 +102,11 @@ var drawMap = function(obs) {
     e.preventDefault();
     var mouseX = parseInt(e.targetTouches[0].clientX - offsetX);
     var mouseY = parseInt(e.targetTouches[0].clientY - offsetY);
-    var threer2 = 9 * rsquared;
     for (var i = 0; i < locations.length; i++) {
       var dot = map.locationPoint(locations[i]);
       var dx = mouseX - dot.x;
       var dy = mouseY - dot.y;
-      if (dx * dx + dy * dy < threer2)
+      if (dx * dx + dy * dy < trsquared)
         alert(obs[i].temperature + "°C @ " + obs[i].altitude + "' @ " + obs[i].observed);
     }
   }
