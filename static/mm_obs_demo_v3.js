@@ -105,7 +105,7 @@ var drawMap = function(obs) {
       var dx = mouseX - dot.x;
       var dy = mouseY - dot.y;
       if (dx * dx + dy * dy < rsquared)
-        alert(obs[i].temperature + "°C @ " + obs[i].altitude + "' @ " + obs[i].received);
+        alert(obs[i].temperature + "°C @ " + obs[i].altitude + "' @ " + obs[i].observed);
     }
   }
   canvas.addEventListener("touchstart", handleTouch, false);
