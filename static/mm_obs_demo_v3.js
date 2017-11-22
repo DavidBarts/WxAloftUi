@@ -100,12 +100,12 @@ var drawMap = function(obs) {
     e.preventDefault();
     var mouseX = parseInt(e.targetTouches[0].clientX - offsetX);
     var mouseY = parseInt(e.targetTouches[0].clientY - offsetY);
-    var twor2 = 4 * rsquared;
+    var threer2 = 9 * rsquared;
     for (var i = 0; i < locations.length; i++) {
       var dot = map.locationPoint(locations[i]);
       var dx = mouseX - dot.x;
       var dy = mouseY - dot.y;
-      if (dx * dx + dy * dy < twor2)
+      if (dx * dx + dy * dy < threer2)
         alert(obs[i].temperature + "°C @ " + obs[i].altitude + "' @ " + obs[i].observed);
     }
   }
