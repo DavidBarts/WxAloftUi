@@ -60,9 +60,8 @@ public class Tile
         if (Math.abs(lon) > MAXLON)
             throw new IllegalArgumentException("Illegal longitude: " + lon);
         int scale = 1 << z;
-        int x = (int) Math.floor((lon + 180.0) / 360.0 * scale);
-        double rlat = Math.toRadians(lat);
-        int y = (int) Math.floor((1.0 - Math.log(Math.tan(rlat) + 1.0 / Math.cos(rlat)) / Math.PI) / 2.0 * scale);
+        int x = (int) Math.floor(lon2tile(lon, scale));
+        int y = (int) Math.floor(lat2tile(lat, scale));
         x = Math.max(0, Math.min(x, scale - 1));
         y = Math.max(0, Math.min(y, scale - 1));
         return new Tile(x, y, z, p);
@@ -216,6 +215,17 @@ public class Tile
         return new Tile(x, sy, zoom, p);
     }
 
+    private static double lon2tile(double longitude, int ntiles)
+    {
+        return ntiles * ((longitude + 180.0) / 360.0);
+    }
+
+    private static double lat2tile(double latitude, int ntiles)
+    {
+        double rl = Math.toRadians(latitude);
+        return ntiles * (1.0 - (Math.log(Math.tan(rl) + 1.0/Math.cos(rl)) / Math.PI)) / 2.0;
+    }
+
     /**
      * Calculate zoom level necessary for a map of size xpixels by ypixels
      * to display everything within the specified bounds. The map will show
@@ -231,27 +241,17 @@ public class Tile
      */
     public static int calcZoom(double south, double west, double north, double east, int xpixels, int ypixels)
     {
-        /* get size in degrees of this area, rejecting absurd bounds */
-        double xdelta = LatLong.eastFrom(west, east);
-        if (LatLong.eastFrom(east, west) < xdelta)
-            throw new IllegalArgumentException(String.format("%f is not west of %f!", west, east));
-        double ydelta = north - south;
-        if (ydelta < 0.0)
-            throw new IllegalArgumentException(String.format("%f is not south of %f!", south, north));
-        /* determine raw zoom factor needed to achieve horizontal scale */
-        double dppx = xdelta / (double) xpixels;
-        double rzoom = Math.log(360.0/(Tile.SIZE * dppx) / LOG2);
-        /* determine resultant and actual needed vertical scales */
-        double dppy = ydelta / (double) ypixels;
-        Tile t = Tile.forLatLong(north, east, (int) rzoom, null);
-        double tdppy = (t.north() - t.south()) / (double) Tile.SIZE;
-        System.out.format("dppx=%f, dppy=%f, tdppy=%f%n", dppx, dppy, tdppy);
-        System.out.format("xdelta=%f, ydelta=%f, prov.zoom=%f, ", xdelta, ydelta, rzoom);
-        /* zoom out if too zoomed in for vertical scale */
-        if (tdppy < dppy)
-            rzoom += Math.log(tdppy / dppy) / LOG2;
-        System.out.format("final.zoom=%f%n", rzoom);
-        /* round the result down and clamp it to allowed values */
-        return Math.max(0, Math.min(MAXZOOM, (int) rzoom));
+        int oldz = 0;
+        for (int z=0, n=1; z <= MAXZOOM; oldz=z++, n<<=1) {
+            double tSouth = lat2tile(south, n);
+            double tWest  = lon2tile(west,  n);
+            double tNorth = lat2tile(north, n);
+            double tEast  = lon2tile(east,  n);
+            int width  = (int) Math.ceil((tSouth - tNorth) * SIZE);
+            int height = (int) Math.ceil((tEast - tWest) * SIZE);
+            if (width > xpixels || height > ypixels)
+                break;
+        }
+        return oldz;
     }
 }
