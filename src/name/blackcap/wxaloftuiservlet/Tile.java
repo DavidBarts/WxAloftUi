@@ -216,35 +216,42 @@ public class Tile
         return new Tile(x, sy, zoom, p);
     }
 
-    private static double _calcZoom(double degrees, int pixels)
-    {
-        double tilesNeeded = Math.max(1.0, Math.round((double) pixels / (double) SIZE));
-        double dpt = degrees / tilesNeeded;
-        return Math.log(360.0 / dpt) / LOG2;
-    }
-
     /**
-     * Calculate zoom level necessary for a map from (swx, swy) to
-     * (nex, ney) to have approximately xpixels and ypixels resolution.
+     * Calculate zoom level necessary for a map of size xpixels by ypixels
+     * to display everything within the specified bounds. The map will show
+     * at least all the bounds specified (and probably more).
      *
-     * @param swy       Latitude of southwest corner.
-     * @param swx       Longitude of southwest corner.
-     * @param ney       Latitude of northeast corner.
-     * @param nex       Longitude of northeast corner.
+     * @param south     Latitude of southwest corner.
+     * @param west      Longitude of southwest corner.
+     * @param north     Latitude of northeast corner.
+     * @param east      Longitude of northeast corner.
      * @param xpixels   Minimum number of E-W pixels.
      * @param ypixels   Minimum number of N-S pixels.
      * @return          Recommended zoom level.
      */
-    public static int calcZoom(double swy, double swx, double ney, double nex, int xpixels, int ypixels)
+    public static int calcZoom(double south, double west, double north, double east, int xpixels, int ypixels)
     {
-        double xdelta = LatLong.eastFrom(swx, nex);
-        if (LatLong.eastFrom(nex, swx) < xdelta)
-            throw new IllegalArgumentException(String.format("%f is not west of %f!", swx, nex));
-        double ydelta = ney - swy;
+        /* get size in degrees of this area, rejecting absurd bounds */
+        double xdelta = LatLong.eastFrom(west, east);
+        if (LatLong.eastFrom(east, west) < xdelta)
+            throw new IllegalArgumentException(String.format("%f is not west of %f!", west, east));
+        double ydelta = north - south;
         if (ydelta < 0.0)
-            throw new IllegalArgumentException(String.format("%f is not south of %f!", swy, ney));
-        double xzoom = _calcZoom(xdelta, xpixels);
-        double yzoom = _calcZoom(ydelta, ypixels);
-        return Math.min(MAXZOOM, (int) Math.round((xzoom + yzoom) / 2.0));
+            throw new IllegalArgumentException(String.format("%f is not south of %f!", south, north));
+        /* determine raw zoom factor needed to achieve horizontal scale */
+        double dppx = xdelta / (double) xpixels;
+        double rzoom = Math.log(360.0/(Tile.SIZE * dppx) / LOG2);
+        /* determine resultant and actual needed vertical scales */
+        double dppy = ydelta / (double) ypixels;
+        Tile t = Tile.forLatLong(north, east, (int) rzoom, null);
+        double tdppy = (t.north() - t.south()) / (double) Tile.SIZE;
+        System.out.format("dppx=%f, dppy=%f, tdppy=%f%n", dppx, dppy, tdppy);
+        System.out.format("xdelta=%f, ydelta=%f, prov.zoom=%f, ", xdelta, ydelta, rzoom);
+        /* zoom out if too zoomed in for vertical scale */
+        if (tdppy < dppy)
+            rzoom += Math.log(tdppy / dppy) / LOG2;
+        System.out.format("final.zoom=%f%n", rzoom);
+        /* round the result down and clamp it to allowed values */
+        return Math.max(0, Math.min(MAXZOOM, (int) rzoom));
     }
 }
