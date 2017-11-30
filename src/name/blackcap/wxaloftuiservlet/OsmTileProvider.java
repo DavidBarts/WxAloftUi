@@ -1,4 +1,4 @@
-// package name.blackcap.wxaloftuiservlet;
+package name.blackcap.wxaloftuiservlet;
 
 /**
  * @author me@blackcap.name

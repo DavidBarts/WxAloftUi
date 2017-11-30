@@ -1,4 +1,4 @@
-// package name.blackcap.wxaloftuiservlet;
+package name.blackcap.wxaloftuiservlet;
 
 /**
  * @author me@blackcap.name
@@ -33,9 +33,13 @@ public class LatLong
         return lat1 < lat2;
     }
 
-    /*
+    /**
      * How far it is (in degrees) if you head east from start to finish.
      * You will always get there, just sometimes the long way 'round...
+     *
+     * @param start     Starting longitude
+     * @param end       Ending longitude
+     * @return          Difference in degrees, always positive
      */
     public static double eastFrom(double start, double finish)
     {
@@ -49,6 +53,23 @@ public class LatLong
             return finish - start;
         /* this is what (180 - start) + (finish - -180) simplifies to */
         return 360.0 - start + finish;
+    }
+
+    /**
+     * Normalize a longitude.
+     *
+     * @param longitude Value to normalize
+     * @return          Normalized value
+     */
+    public static double normalizeLong(double longitude) {
+        /* there should be only one representation for the 180 degree value */
+        if (longitude == -180.0)
+            return 180.0;
+        if (longitude > 180.0)
+            return normalizeLong(longitude - 360.0);
+        if (longitude < -180.0)
+            return normalizeLong(longitude + 360.0);
+        return longitude;
     }
 
     /**

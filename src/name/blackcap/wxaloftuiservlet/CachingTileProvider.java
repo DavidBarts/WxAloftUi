@@ -1,4 +1,4 @@
-// package name.blackcap.wxaloftuiservlet;
+package name.blackcap.wxaloftuiservlet;
 
 import java.awt.Image;
 import java.awt.image.RenderedImage;

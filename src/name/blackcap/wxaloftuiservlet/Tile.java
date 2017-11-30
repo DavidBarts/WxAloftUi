@@ -1,4 +1,4 @@
-// package name.blackcap.wxaloftuiservlet;
+package name.blackcap.wxaloftuiservlet;
 
 import java.awt.Image;
 import java.io.IOException;
@@ -216,14 +216,16 @@ public class Tile
         return new Tile(x, sy, zoom, p);
     }
 
-    private static int _calcZoom(double degrees, int pixels)
+    private static double _calcZoom(double degrees, int pixels)
     {
-        return (int) Math.ceil(Math.log((pixels*360.0)/(SIZE*degrees))/LOG2);
+        double tilesNeeded = Math.max(1.0, Math.round((double) pixels / (double) SIZE));
+        double dpt = degrees / tilesNeeded;
+        return Math.log(360.0 / dpt) / LOG2;
     }
 
     /**
      * Calculate zoom level necessary for a map from (swx, swy) to
-     * (nex, ney) to have at least xpixels and ypixels resolution.
+     * (nex, ney) to have approximately xpixels and ypixels resolution.
      *
      * @param swy       Latitude of southwest corner.
      * @param swx       Longitude of southwest corner.
@@ -241,8 +243,8 @@ public class Tile
         double ydelta = ney - swy;
         if (ydelta < 0.0)
             throw new IllegalArgumentException(String.format("%f is not south of %f!", swy, ney));
-        int xzoom = _calcZoom(xdelta, xpixels);
-        int yzoom = _calcZoom(ydelta, ypixels);
-        return Math.min(MAXZOOM, Math.max(xzoom, yzoom));
+        double xzoom = _calcZoom(xdelta, xpixels);
+        double yzoom = _calcZoom(ydelta, ypixels);
+        return Math.min(MAXZOOM, (int) Math.round((xzoom + yzoom) / 2.0));
     }
 }

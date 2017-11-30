@@ -1,4 +1,4 @@
-// package name.blackcap.wxaloftuiservlet;
+package name.blackcap.wxaloftuiservlet;
 
 import java.io.File;
 import java.io.IOException;

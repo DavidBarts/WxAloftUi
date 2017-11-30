@@ -1,10 +1,12 @@
-// package name.blackcap.wxaloftuiservlet;
+package name.blackcap.wxaloftuiservlet;
 
 import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * A raster-based map that uses tiles from the OSM tile server.
@@ -29,7 +31,7 @@ public class Map {
     private double tdwidth, tdheight;
     // Width and height of this map in degrees
     private double dwidth, dheight;
-
+    
     /**
      * A raster-based map, with extents specified by latitude and longitude,
      * and the specified minimum resolutions, using the specified provider
@@ -76,14 +78,14 @@ public class Map {
      *
      * @return          BufferedImage object.
      */
-    public BufferedImage getImage()
+    public BufferedImage getImage() throws IOException
     {
-        if (image == null) {
+        if (image == null)
             image = makeImage();
         return image;
     }
 
-    private BufferedImage makeImage()
+    private BufferedImage makeImage() throws IOException
     {
         // Make a raw image
         BufferedImage rawImage = new BufferedImage(Tile.SIZE*width, Tile.SIZE*height, BufferedImage.TYPE_INT_RGB);
