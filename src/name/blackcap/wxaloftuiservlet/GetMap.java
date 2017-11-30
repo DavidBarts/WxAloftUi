@@ -36,7 +36,7 @@ public class GetMap extends HttpServlet {
     private static final long serialVersionUID = -812260914481768455L;
 
     private static final Logger LOGGER = Logger.getLogger(GetMap.class.getCanonicalName());
-    public static final int PIXELS = 640;
+    public static final int PIXELS = 512;
 
     /**
      * Process a GET request by returning all appropriate observations.
@@ -220,7 +220,7 @@ public class GetMap extends HttpServlet {
             resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Internal server error (unable to create map)");
             return;
         }
-        Graphics2D g = image. createGraphics();
+        Graphics2D g = image.createGraphics();
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
         final int DIAMETER = 8;
