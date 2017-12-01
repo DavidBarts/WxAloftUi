@@ -150,10 +150,24 @@ public class Map {
      */
     private static void sanityCheck(double south, double west, double north, double east)
     {
+        sanityCheckLat(north);
+        sanityCheckLat(south);
+        sanityCheckLong(east);
+        sanityCheckLong(west);
         if (south >= north)
             throw new IllegalArgumentException(String.format("%f not north of %f!", north, south));
         if (east == west || LatLong.eastFrom(west, east) > LatLong.eastFrom(east, west))
             throw new IllegalArgumentException(String.format("%f not east of %f!", east, west));
+    }
+    private static void sanityCheckLat(double latitude)
+    {
+        if (Math.abs(latitude) > Tile.MAXLAT)
+            throw new IllegalArgumentException(String.format("invalid or unsupported latitude %f", latitude));
+    }
+    private static void sanityCheckLong(double longitude)
+    {
+        if (Math.abs(longitude) > Tile.MAXLON)
+            throw new IllegalArgumentException(String.format("invalid or unsupported longitude %f", longitude));
     }
 
     /**

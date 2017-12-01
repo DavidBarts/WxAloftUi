@@ -17,9 +17,9 @@ public class Tile
 {
     public static final int SIZE = 256;
     public static final int MAXZOOM = 18;
+    public static final double MAXLAT = Math.toDegrees(Math.atan(Math.sinh(Math.PI)));
+    public static final double MAXLON = 180.0;
 
-    private static final double MAXLAT = Math.toDegrees(Math.atan(Math.sinh(Math.PI)));
-    private static final double MAXLON = 180.0;
     private static final double LOG2 = Math.log(2.0);
 
     private TileProvider p;
