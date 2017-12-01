@@ -95,6 +95,22 @@ public class GetMap extends HttpServlet {
             }
         }
 
+        /* get optional output size */
+        String rawSize = req.getParameter("size");
+        int maxSize = PIXELS;
+        if (rawSize != null) {
+            boolean bad = false;
+            try {
+                maxSize = Integer.parseInt(rawSize);
+                bad = maxSize < 256 || maxSize > 1024;
+            } catch (NumberFormatException e) {
+                bad = true;
+            }
+            if (bad) {
+                resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Bad request (invalid size)");
+            }
+        }
+
         /* get the optional bounds */
         Double north = null, south = null, east = null, west = null;
         try {
@@ -211,7 +227,9 @@ public class GetMap extends HttpServlet {
         CachingTileProvider p = new CachingTileProvider(new File(cachePath), new OsmTileProvider());
 
         /* OK, finally ready to generate a map */
-        Map m = new Map(south, west, north, east, PIXELS, PIXELS, p);
+        double[] bounds = new double[] { south, west, north, east };
+        int[] size = new int[] { maxSize, maxSize };
+        Map m = Map.withSize(bounds, size, p);
         BufferedImage image = null;
         try {
             image = m.getImage();
@@ -235,6 +253,12 @@ public class GetMap extends HttpServlet {
             g.setColor(getColor(o.getAltitude()));
             g.fillOval(x, y, DIAMETER, DIAMETER);
         }
+
+        /* XXX - currently the extents are sometimes a tad large */
+        if (image.getWidth() > maxSize || image.getHeight() > maxSize)
+            image = image.getSubimage(0, 0,
+                Math.min(maxSize, image.getHeight()),
+                Math.min(maxSize, image.getWidth()));
 
         /* now return it */
         resp.setStatus(200);
