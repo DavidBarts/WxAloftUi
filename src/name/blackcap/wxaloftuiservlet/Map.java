@@ -48,6 +48,8 @@ public class Map {
      */
     public Map(double south, double west, double north, double east, int zoom, TileProvider p)
     {
+        sanityCheck(south, west, north, east);
+
         this.south = south;
         this.west = west;
         this.north = north;
@@ -101,6 +103,7 @@ public class Map {
         double west  = bounds[1];
         double north = bounds[2];
         double east  = bounds[3];
+        sanityCheck(south, west, north, east);
         double xtiles = (double) size[0] / (double) Tile.SIZE;
         double ytiles = (double) size[1] / (double) Tile.SIZE;
 
@@ -109,8 +112,7 @@ public class Map {
         double tSouth = 0.0, tNorth = 0.0, tEast = 0.0, tWest = 0.0;
         double ntSouth = 0.0, ntNorth = 0.0, ntEast = 0.0, ntWest = 0.0;
         Tile tspace = null, ntspace = null;
-        int limit = Tile.MAXZOOM + 1;  /* ugly */
-        for (int z=0; z <= limit; zoom=z++) {
+        for (int z=0; z <= Tile.MAXZOOM; zoom=z++) {
             tspace = ntspace;
             ntspace = new Tile(0, 0, z, null);
             tSouth = ntSouth;
@@ -141,6 +143,17 @@ public class Map {
         // done?!
         return new Map(tspace.toLatitude(ntSouth), tspace.toLongitude(ntWest),
             tspace.toLatitude(ntNorth), tspace.toLongitude(ntEast), zoom, p);
+    }
+
+    /*
+     * This class is prone to hose the tile server if we don't do this.
+     */
+    private static void sanityCheck(double south, double west, double north, double east)
+    {
+        if (south >= north)
+            throw new IllegalArgumentException(String.format("%f not north of %f!", north, south));
+        if (east == west || LatLong.eastFrom(west, east) > LatLong.eastFrom(east, west))
+            throw new IllegalArgumentException(String.format("%f not east of %f!", east, west));
     }
 
     /**
