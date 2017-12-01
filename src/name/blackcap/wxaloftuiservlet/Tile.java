@@ -26,7 +26,7 @@ public class Tile
     private Image image;
     private int x, y;
     private int zoom;
-    private int rowsAndCols;
+    private int numTiles;
 
     /**
      * Constructor.
@@ -41,7 +41,7 @@ public class Tile
         this.x = x;
         this.y = y;
         this.zoom = z;
-        this.rowsAndCols = 1 << zoom;
+        this.numTiles = 1 << zoom;
         this.p = p;
         this.image = null;
     }
@@ -56,9 +56,9 @@ public class Tile
      */
     public static Tile forLatLong(double lat, double lon, int z, TileProvider p)
     {
-        int rowsAndCols = 1 << z;
-        int x = (int) Math.floor(_toTileX(lon, rowsAndCols));
-        int y = (int) Math.floor(_toTileY(lat, rowsAndCols));
+        int numTiles = 1 << z;
+        int x = (int) Math.floor(_toTileX(lon, numTiles));
+        int y = (int) Math.floor(_toTileY(lat, numTiles));
         return new Tile(x, y, z, p);
     }
 
@@ -93,6 +93,16 @@ public class Tile
     }
 
     /**
+     * Get number of tiles in each direction at current zoom level.
+     *
+     * @return          Number of tiles.
+     */
+    public int getNumTiles()
+    {
+        return numTiles;
+    }
+
+    /**
      * Get tile image.
      *
      * @return          Tile map image.
@@ -114,7 +124,7 @@ public class Tile
      */
     public double toLongitude(double x)
     {
-        return x / (double) rowsAndCols * 360.0 - 180.0;
+        return x / (double) numTiles * 360.0 - 180.0;
     }
 
     /**
@@ -135,7 +145,7 @@ public class Tile
     public double east()
     {
         int ex = x + 1;
-        if (ex >= rowsAndCols)
+        if (ex >= numTiles)
             ex = 0;
         return toLongitude((double) ex);
     }
@@ -148,7 +158,7 @@ public class Tile
      */
     public double toLatitude(double y)
     {
-        double n = Math.PI - (2.0 * Math.PI * y) / (double) rowsAndCols;
+        double n = Math.PI - (2.0 * Math.PI * y) / (double) numTiles;
         return Math.toDegrees(Math.atan(Math.sinh(n)));
     }
 
@@ -180,7 +190,7 @@ public class Tile
     public Tile eastTile()
     {
         int ex = x + 1;
-        if (ex >= rowsAndCols)
+        if (ex >= numTiles)
             ex = 0;
         return new Tile(ex, y, zoom, p);
     }
@@ -194,7 +204,7 @@ public class Tile
     {
         int wx = x - 1;
         if (wx < 0)
-            wx = rowsAndCols - 1;
+            wx = numTiles - 1;
         return new Tile(wx, y, zoom, p);
     }
 
@@ -219,7 +229,7 @@ public class Tile
     public Tile southTile()
     {
         int sy = y + 1;
-        if (sy >= rowsAndCols)
+        if (sy >= numTiles)
             return null;
         return new Tile(x, sy, zoom, p);
     }
@@ -232,14 +242,14 @@ public class Tile
      */
     public double toTileX(double longitude)
     {
-        return _toTileX(longitude, rowsAndCols);
+        return _toTileX(longitude, numTiles);
     }
 
-    private static double _toTileX(double longitude, int rowsAndCols)
+    private static double _toTileX(double longitude, int numTiles)
     {
         if (Math.abs(longitude) > MAXLON)
             throw new IllegalArgumentException("Illegal longitude: " + longitude);
-        return rowsAndCols * ((longitude + 180.0) / 360.0);
+        return numTiles * ((longitude + 180.0) / 360.0);
     }
 
     /**
@@ -250,43 +260,14 @@ public class Tile
      */
     public double toTileY(double latitude)
     {
-        return _toTileY(latitude, rowsAndCols);
+        return _toTileY(latitude, numTiles);
     }
 
-    private static double _toTileY(double latitude, int rowsAndCols)
+    private static double _toTileY(double latitude, int numTiles)
     {
         if (Math.abs(latitude) > MAXLAT)
             throw new IllegalArgumentException("Illegal latitude: " + latitude);
         double rl = Math.toRadians(latitude);
-        return rowsAndCols * (1.0 - (Math.log(Math.tan(rl) + 1.0/Math.cos(rl)) / Math.PI)) / 2.0;
+        return numTiles * (1.0 - (Math.log(Math.tan(rl) + 1.0/Math.cos(rl)) / Math.PI)) / 2.0;
     }
-
-    /**
-     * Calculate zoom level necessary for a map of size xpixels by ypixels
-     * to display everything within the specified bounds. The map will show
-     * at least all the bounds specified (and probably more).
-     *
-     * @param south     Latitude of southwest corner.
-     * @param west      Longitude of southwest corner.
-     * @param north     Latitude of northeast corner.
-     * @param east      Longitude of northeast corner.
-     * @param xpixels   Minimum number of E-W pixels.
-     * @param ypixels   Minimum number of N-S pixels.
-     * @return          Recommended zoom level.
-     */
-    /* public static int calcZoom(double south, double west, double north, double east, int xpixels, int ypixels)
-    {
-        int oldz = 0;
-        for (int z=0, n=1; z <= MAXZOOM; oldz=z++, n<<=1) {
-            double tSouth = _toTileY(south, n);
-            double tWest  = _toTileX(west,  n);
-            double tNorth = _toTileY(north, n);
-            double tEast  = _toTileX(east,  n);
-            int width  = (int) Math.ceil((tSouth - tNorth) * SIZE);
-            int height = (int) Math.ceil((tEast - tWest) * SIZE);
-            if (width > xpixels || height > ypixels)
-                break;
-        }
-        return oldz;
-    } */
 }

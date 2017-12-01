@@ -82,6 +82,18 @@ public class Map {
         this(bounds[0], bounds[1], bounds[2], bounds[3], zoom, p);
     }
 
+    /**
+     * Given bounds and an image size, return a map that will render to
+     * the specified size and include all the specified bounds.
+     *
+     * BUG: It doesn't always get the _exact_ size specified. It's not off
+     * by much, but there's up to a dozen or two pixels discrepancy. I've
+     * chalked it up to rounding errors.
+     *
+     * @param bounds    Array of four doubles { S, W, N, E }
+     * @param size      Array of two ints { width, height }
+     * @param p         TileProvider
+     */
     public static Map withSize(double[] bounds, int[] size, TileProvider p)
     {
         // "unzip" the arrays to meaningful variable names
@@ -89,88 +101,47 @@ public class Map {
         double west  = bounds[1];
         double north = bounds[2];
         double east  = bounds[3];
-        int xpixels  = size[0];
-        int ypixels = size[1];
+        double xtiles = (double) size[0] / (double) Tile.SIZE;
+        double ytiles = (double) size[1] / (double) Tile.SIZE;
 
         // determine zoom level (tricky!)
         int zoom = 0;
-        int width = 0, nwidth = 0, height = 0, nheight = 0;
-        for (int z=0; z <= Tile.MAXZOOM; zoom=z++) {
-            Tile dummy = new Tile(0, 0, z, null);
-            double tSouth = dummy.toTileY(south);
-            double tWest  = dummy.toTileX(west);
-            double tNorth = dummy.toTileY(north);
-            double tEast  = dummy.toTileX(east);
-            height = nheight;
-            nheight = (int) Math.ceil((tSouth - tNorth) * Tile.SIZE);
-            width = nwidth;
-            nwidth = (int) Math.ceil((tEast - tWest) * Tile.SIZE);
-            if (nwidth > xpixels || nheight > ypixels)
+        double tSouth = 0.0, tNorth = 0.0, tEast = 0.0, tWest = 0.0;
+        double ntSouth = 0.0, ntNorth = 0.0, ntEast = 0.0, ntWest = 0.0;
+        Tile tspace = null, ntspace = null;
+        int limit = Tile.MAXZOOM + 1;  /* ugly */
+        for (int z=0; z <= limit; zoom=z++) {
+            tspace = ntspace;
+            ntspace = new Tile(0, 0, z, null);
+            tSouth = ntSouth;
+            ntSouth = ntspace.toTileY(south);
+            tWest = ntWest;
+            ntWest  = ntspace.toTileX(west);
+            tNorth = ntNorth;
+            ntNorth = ntspace.toTileY(north);
+            tEast = ntEast;
+            ntEast  = ntspace.toTileX(east);
+            if ((ntSouth - ntNorth) > xtiles || (ntEast - ntWest) > ytiles)
                 break;
         }
-        System.out.format("xpixels=%d, ypixels=%d%n", xpixels, ypixels);
-        System.out.format("width=%d, height=%d%n", width, height);
-        System.out.format("nwidth=%d, nheight=%d%n", nwidth, nheight);
 
         // deal with size discrepancies
-        int hextra = xpixels - width;
-        int vextra = ypixels - height;
-        double vdeg = north - south;
-        double hdeg = LatLong.eastFrom(west, east);
-        System.out.format("vdeg=%f, hdeg=%f%n", vdeg, hdeg);
-        double hmargin = hdeg * (double) hextra / (double) width / 2.0;
-        double vmargin = vdeg * (double) vextra / (double) height / 2.0;
-        System.out.format("vmargin=%f, hmargin=%f%n", vmargin, hmargin);
-        south -= vmargin;
-        west = LatLong.normalizeLong(west - hmargin);
-        north += vmargin;
-        east = LatLong.normalizeLong(east + hmargin);
+        double hmargin = (xtiles - (tEast - tWest)) / 2.0;
+        double vmargin = (ytiles - (tSouth - tNorth)) / 2.0;
+        int ntiles = tspace.getNumTiles();
+        ntWest = tWest - hmargin;
+        if (ntWest < 0)
+            ntWest += ntiles;
+        ntEast = tEast + hmargin;
+        if (ntEast > ntiles)
+            ntEast -= ntiles;
+        ntNorth = Math.max(0, tNorth - vmargin);
+        ntSouth = Math.min(ntiles, tSouth + vmargin);
 
         // done?!
-        return new Map(south, west, north, east, zoom, p);
+        return new Map(tspace.toLatitude(ntSouth), tspace.toLongitude(ntWest),
+            tspace.toLatitude(ntNorth), tspace.toLongitude(ntEast), zoom, p);
     }
-
-    /**
-     * Given bounds and an image size, return the most detailed (i.e.
-     * highest zoom level) map that will show all of specified bounds.
-     *
-     * @param bounds    Array of four doubles { S, W, N, E }
-     * @param size      Array of two ints { width, height }
-     * @param p         TileProvider
-     */
-    /* public static Map withSize(double[] bounds, int[] size, TileProvider p)
-    {
-        // "unzip" the arrays to meaningful variable names
-        double south = bounds[0];
-        double west  = bounds[1];
-        double north = bounds[2];
-        double east  = bounds[3];
-        int width  = size[0];
-        int height = size[1];
-
-        // determine requested width and height in degrees
-        double dheight = north - south;
-        double dwidth = LatLong.eastFrom(west, east);
-
-        // determine zoom level and actual size in degrees we will map
-        int zoom = Tile.calcZoom(south, west, north, east, width, height);
-        int tilesWide = width / Tile.SIZE + (width % Tile.SIZE > 0 ? 1 : 0);
-        int tilesHigh = height / Tile.SIZE + (height % Tile.SIZE > 0 ? 1 : 0);
-        Tile t = Tile.forLatLong(north, east, zoom, null);
-        double adheight = tilesHigh * (t.north() - t.south());
-        double adwidth = tilesWide * LatLong.eastFrom(t.west(), t.east());
-
-        // from that, calculate extra space we need to add
-        double vmargin = (adheight - dheight) / 2.0;
-        double hmargin = (adwidth - dwidth) / 2.0;
-
-        // get correct bounds and return map
-        south -= vmargin;
-        north += vmargin;
-        east = LatLong.normalizeLong(east + hmargin);
-        west = LatLong.normalizeLong(west - hmargin);
-        return new Map(south, west, north, east, zoom, p);
-    } */
 
     /**
      * Get the image representing the map. It is allowed to draw on the
