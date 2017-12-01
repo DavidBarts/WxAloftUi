@@ -249,7 +249,10 @@ public class Tile
     {
         if (Math.abs(longitude) > MAXLON)
             throw new IllegalArgumentException("Illegal longitude: " + longitude);
-        return numTiles * ((longitude + 180.0) / 360.0);
+        double ret = numTiles * ((longitude + 180.0) / 360.0);
+        if (ret >= numTiles)
+            ret -= numTiles;
+        return ret;
     }
 
     /**

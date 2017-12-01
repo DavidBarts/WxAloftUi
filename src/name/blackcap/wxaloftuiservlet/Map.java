@@ -123,14 +123,14 @@ public class Map {
             ntNorth = ntspace.toTileY(north);
             tEast = ntEast;
             ntEast  = ntspace.toTileX(east);
-            if ((ntSouth - ntNorth) > xtiles || (ntEast - ntWest) > ytiles)
+            if ((ntSouth - ntNorth) > xtiles || eastFrom(ntWest, ntEast, ntspace.getNumTiles()) > ytiles)
                 break;
         }
 
         // deal with size discrepancies
-        double hmargin = (xtiles - (tEast - tWest)) / 2.0;
-        double vmargin = (ytiles - (tSouth - tNorth)) / 2.0;
         int ntiles = tspace.getNumTiles();
+        double hmargin = (xtiles - eastFrom(tWest, tEast, ntiles)) / 2.0;
+        double vmargin = (ytiles - (tSouth - tNorth)) / 2.0;
         ntWest = tWest - hmargin;
         if (ntWest < 0)
             ntWest += ntiles;
@@ -143,6 +143,15 @@ public class Map {
         // done?!
         return new Map(tspace.toLatitude(ntSouth), tspace.toLongitude(ntWest),
             tspace.toLatitude(ntNorth), tspace.toLongitude(ntEast), zoom, p);
+    }
+
+    /* tile space analogue of LatLong.eastFrom */
+    private static double eastFrom(double start, double finish, int numTiles)
+    {
+        if (finish >= start)
+            return finish - start;
+        else
+            return (double) numTiles - start + finish;
     }
 
     /*
