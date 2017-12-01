@@ -37,6 +37,7 @@ public class GetMap extends HttpServlet {
 
     private static final Logger LOGGER = Logger.getLogger(GetMap.class.getCanonicalName());
     public static final int PIXELS = 512;
+    public static final int LIMIT = 16;
 
     /**
      * Process a GET request by returning all appropriate observations.
@@ -224,7 +225,8 @@ public class GetMap extends HttpServlet {
             resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Internal server error (no cache defined)");
             return;
         }
-        CachingTileProvider p = new CachingTileProvider(new File(cachePath), new OsmTileProvider());
+        LimitingTileProvider p = new LimitingTileProvider(LIMIT,
+            new CachingTileProvider(new File(cachePath), new OsmTileProvider()));
 
         /* OK, finally ready to generate a map */
         double[] bounds = new double[] { south, west, north, east };
