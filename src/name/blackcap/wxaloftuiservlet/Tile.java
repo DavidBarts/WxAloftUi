@@ -11,14 +11,15 @@ import java.io.IOException;
  * are rectangles that get increasingly short and squat as we move away
  * from the equator. Tiles render lazily, and it is allowed to pass a null
  * tile provider (in which case, the tile can only be used for retrieving
- * the basic properties of a tile).
+ * the basic properties of a tile or tilespace).
  */
 public class Tile
 {
+    public static final int SIZE = 256;
+    public static final int MAXZOOM = 18;
+
     private static final double MAXLAT = Math.toDegrees(Math.atan(Math.sinh(Math.PI)));
     private static final double MAXLON = 180.0;
-    public static final int SIZE = 256;
-    private static final int MAXZOOM = 18;
     private static final double LOG2 = Math.log(2.0);
 
     private TileProvider p;
@@ -55,15 +56,9 @@ public class Tile
      */
     public static Tile forLatLong(double lat, double lon, int z, TileProvider p)
     {
-        if (Math.abs(lat) > MAXLAT)
-            throw new IllegalArgumentException("Illegal latitude: " + lat);
-        if (Math.abs(lon) > MAXLON)
-            throw new IllegalArgumentException("Illegal longitude: " + lon);
-        int scale = 1 << z;
-        int x = (int) Math.floor(lon2tile(lon, scale));
-        int y = (int) Math.floor(lat2tile(lat, scale));
-        x = Math.max(0, Math.min(x, scale - 1));
-        y = Math.max(0, Math.min(y, scale - 1));
+        int rowsAndCols = 1 << z;
+        int x = (int) Math.floor(_toTileX(lon, rowsAndCols));
+        int y = (int) Math.floor(_toTileY(lat, rowsAndCols));
         return new Tile(x, y, z, p);
     }
 
@@ -104,12 +99,20 @@ public class Tile
      */
     public Image getImage() throws IOException
     {
+        if (p == null)
+            throw new IllegalStateException("No tile provider available.");
         if (image == null)
             image = p.getTile(x, y, zoom);
         return image;
     }
 
-    private double tile2lon(int x)
+    /**
+     * Convert tilespace x coordinate to longitude.
+     *
+     * @param           Tilespace X coordinate.
+     * @return          Longitude
+     */
+    public double toLongitude(double x)
     {
         return x / (double) rowsAndCols * 360.0 - 180.0;
     }
@@ -121,7 +124,7 @@ public class Tile
      */
     public double west()
     {
-        return tile2lon(x);
+        return toLongitude((double) x);
     }
 
     /**
@@ -134,10 +137,16 @@ public class Tile
         int ex = x + 1;
         if (ex >= rowsAndCols)
             ex = 0;
-        return tile2lon(ex);
+        return toLongitude((double) ex);
     }
 
-    private double tile2lat(int y)
+    /**
+     * Convert tilespace y coordinate to latitude
+     *
+     * @param           Tilespace y coordinate, fractional values allowed.
+     * @return          Latitude
+     */
+    public double toLatitude(double y)
     {
         double n = Math.PI - (2.0 * Math.PI * y) / (double) rowsAndCols;
         return Math.toDegrees(Math.atan(Math.sinh(n)));
@@ -150,7 +159,7 @@ public class Tile
      */
     public double north()
     {
-        return tile2lat(y);
+        return toLatitude((double) y);
     }
 
     /**
@@ -160,7 +169,7 @@ public class Tile
      */
     public double south()
     {
-        return tile2lat(y + 1);
+        return toLatitude((double) y + 1.0);
     }
 
     /**
@@ -215,15 +224,41 @@ public class Tile
         return new Tile(x, sy, zoom, p);
     }
 
-    private static double lon2tile(double longitude, int ntiles)
+    /**
+     * Convert longitude to tilespace coordinate.
+     *
+     * @param longitude Longitude to convert
+     * @return          Possibly fractional x coordinate
+     */
+    public double toTileX(double longitude)
     {
-        return ntiles * ((longitude + 180.0) / 360.0);
+        return _toTileX(longitude, rowsAndCols);
     }
 
-    private static double lat2tile(double latitude, int ntiles)
+    private static double _toTileX(double longitude, int rowsAndCols)
     {
+        if (Math.abs(longitude) > MAXLON)
+            throw new IllegalArgumentException("Illegal longitude: " + longitude);
+        return rowsAndCols * ((longitude + 180.0) / 360.0);
+    }
+
+    /**
+     * Convert latitude to tilespace coordinate.
+     *
+     * @param latitude  Latitude to convert
+     * @return          Possibly fractional y coordinate
+     */
+    public double toTileY(double latitude)
+    {
+        return _toTileY(latitude, rowsAndCols);
+    }
+
+    private static double _toTileY(double latitude, int rowsAndCols)
+    {
+        if (Math.abs(latitude) > MAXLAT)
+            throw new IllegalArgumentException("Illegal latitude: " + latitude);
         double rl = Math.toRadians(latitude);
-        return ntiles * (1.0 - (Math.log(Math.tan(rl) + 1.0/Math.cos(rl)) / Math.PI)) / 2.0;
+        return rowsAndCols * (1.0 - (Math.log(Math.tan(rl) + 1.0/Math.cos(rl)) / Math.PI)) / 2.0;
     }
 
     /**
@@ -239,19 +274,19 @@ public class Tile
      * @param ypixels   Minimum number of N-S pixels.
      * @return          Recommended zoom level.
      */
-    public static int calcZoom(double south, double west, double north, double east, int xpixels, int ypixels)
+    /* public static int calcZoom(double south, double west, double north, double east, int xpixels, int ypixels)
     {
         int oldz = 0;
         for (int z=0, n=1; z <= MAXZOOM; oldz=z++, n<<=1) {
-            double tSouth = lat2tile(south, n);
-            double tWest  = lon2tile(west,  n);
-            double tNorth = lat2tile(north, n);
-            double tEast  = lon2tile(east,  n);
+            double tSouth = _toTileY(south, n);
+            double tWest  = _toTileX(west,  n);
+            double tNorth = _toTileY(north, n);
+            double tEast  = _toTileX(east,  n);
             int width  = (int) Math.ceil((tSouth - tNorth) * SIZE);
             int height = (int) Math.ceil((tEast - tWest) * SIZE);
             if (width > xpixels || height > ypixels)
                 break;
         }
         return oldz;
-    }
+    } */
 }

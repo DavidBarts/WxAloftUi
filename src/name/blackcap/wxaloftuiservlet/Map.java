@@ -82,17 +82,6 @@ public class Map {
         this(bounds[0], bounds[1], bounds[2], bounds[3], zoom, p);
     }
 
-    private static double lon2tile(double longitude, int ntiles)
-    {
-        return ntiles * ((longitude + 180.0) / 360.0);
-    }
-
-    private static double lat2tile(double latitude, int ntiles)
-    {
-        double rl = Math.toRadians(latitude);
-        return ntiles * (1.0 - (Math.log(Math.tan(rl) + 1.0/Math.cos(rl)) / Math.PI)) / 2.0;
-    }
-
     public static Map withSize(double[] bounds, int[] size, TileProvider p)
     {
         // "unzip" the arrays to meaningful variable names
@@ -106,11 +95,12 @@ public class Map {
         // determine zoom level (tricky!)
         int zoom = 0;
         int width = 0, nwidth = 0, height = 0, nheight = 0;
-        for (int z=0, n=1; z <= 18; zoom=z++, n<<=1) {
-            double tSouth = lat2tile(south, n);
-            double tWest  = lon2tile(west,  n);
-            double tNorth = lat2tile(north, n);
-            double tEast  = lon2tile(east,  n);
+        for (int z=0; z <= Tile.MAXZOOM; zoom=z++) {
+            Tile dummy = new Tile(0, 0, z, null);
+            double tSouth = dummy.toTileY(south);
+            double tWest  = dummy.toTileX(west);
+            double tNorth = dummy.toTileY(north);
+            double tEast  = dummy.toTileX(east);
             height = nheight;
             nheight = (int) Math.ceil((tSouth - tNorth) * Tile.SIZE);
             width = nwidth;
@@ -120,6 +110,7 @@ public class Map {
         }
         System.out.format("xpixels=%d, ypixels=%d%n", xpixels, ypixels);
         System.out.format("width=%d, height=%d%n", width, height);
+        System.out.format("nwidth=%d, nheight=%d%n", nwidth, nheight);
 
         // deal with size discrepancies
         int hextra = xpixels - width;
