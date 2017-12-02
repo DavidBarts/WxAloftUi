@@ -36,8 +36,9 @@ public class GetMap extends HttpServlet {
     private static final long serialVersionUID = -812260914481768455L;
 
     private static final Logger LOGGER = Logger.getLogger(GetMap.class.getCanonicalName());
-    public static final int PIXELS = 512;
-    public static final int LIMIT = 16;
+    public static final int PIXELS = 640;
+    public static final int LIMIT = 25;
+    public static final int RADIUS = 4;
 
     /**
      * Process a GET request by returning all appropriate observations.
@@ -210,12 +211,6 @@ public class GetMap extends HttpServlet {
             south -= margin;
             east = LatLong.normalizeLong(east + margin);
             west = LatLong.normalizeLong(west - margin);
-
-            /* then we save them to the session */
-            sess.setAttribute("north", north);
-            sess.setAttribute("south", south);
-            sess.setAttribute("east", east);
-            sess.setAttribute("west", west);
         }
 
         /* get cache directory and a provider */
@@ -243,8 +238,8 @@ public class GetMap extends HttpServlet {
         Graphics2D g = image.createGraphics();
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
-        final int DIAMETER = 8;
-        final int OFFSET = DIAMETER / 2;
+        final int DIAMETER = RADIUS * 2;
+        final int OFFSET = RADIUS;
         for (AcarsObservation o : obs) {
             int x = m.longToPixel(o.getLongitude()) - OFFSET;
             if (badX(image, x) || badX(image, x + DIAMETER))
@@ -256,11 +251,14 @@ public class GetMap extends HttpServlet {
             g.fillOval(x, y, DIAMETER, DIAMETER);
         }
 
-        /* XXX - currently the extents are sometimes a tad large */
-        if (image.getWidth() > maxSize || image.getHeight() > maxSize)
-            image = image.getSubimage(0, 0,
-                Math.min(maxSize, image.getHeight()),
-                Math.min(maxSize, image.getWidth()));
+        /* make note of the map extents if this is the first time we've
+           made a map this session */
+        if (!hasBounds) {
+            sess.setAttribute("north", north);
+            sess.setAttribute("south", south);
+            sess.setAttribute("east", east);
+            sess.setAttribute("west", west);
+        }
 
         /* now return it */
         resp.setStatus(200);

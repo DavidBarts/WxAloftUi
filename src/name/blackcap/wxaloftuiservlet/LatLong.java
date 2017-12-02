@@ -62,13 +62,13 @@ public class LatLong
      * @return          Normalized value
      */
     public static double normalizeLong(double longitude) {
+        while (longitude > 180.0)
+            longitude -= 360.0;
+        while (longitude < -180.0)
+            longitude += 360.0;
         /* there should be only one representation for the 180 degree value */
         if (longitude == -180.0)
             return 180.0;
-        if (longitude > 180.0)
-            return normalizeLong(longitude - 360.0);
-        if (longitude < -180.0)
-            return normalizeLong(longitude + 360.0);
         return longitude;
     }
 
