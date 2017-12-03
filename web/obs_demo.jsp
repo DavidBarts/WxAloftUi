@@ -1,4 +1,4 @@
-<%@ page contentType="text/html; charset=UTF-8" %>
+<%@ page contentType="text/html; charset=UTF-8"  %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <%@ page language="java" import="name.blackcap.wxaloftuiservlet.ObsDemoBean" %>
@@ -36,9 +36,9 @@
         alt="usemap" border="0" usemap="#observations" />
       <map name="observations">
         <c:forEach var="observation" items="${obsDemo.observations}">
-          <area shape="circle", coords="${observation.x},${observation.y},${obsDemo.radius}"
+          <area shape="circle" coords="${observation.x},${observation.y},${obsDemo.radius}"
             href="obs_demo_detail.jsp?id=${observation.id}"
-            title="${fn:escapeXml(observation.description)}" />
+            title="${observation.details}" />
         </c:forEach>
       </map>
     </form>

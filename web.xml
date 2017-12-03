@@ -16,11 +16,12 @@
   limitations under the License.
 -->
 
-<!DOCTYPE web-app
-    PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
-    "http://java.sun.com/dtd/web-app_2_3.dtd">
-
-<web-app>
+<web-app xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee
+                      http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd"
+  version="3.1"
+  metadata-complete="true">
 
     <!-- General description of your web application -->
 
@@ -28,7 +29,7 @@
     <description>
       This is the user interface for the Weather Aloft project.
     </description>
-
+ 
     <!-- Context initialization parameters that define shared
          String constants used within your application, which
          can be customized by the system administrator who is
@@ -133,5 +134,5 @@
     <session-config>
       <session-timeout>30</session-timeout>    <!-- 30 minutes -->
     </session-config>
-
+    
 </web-app>

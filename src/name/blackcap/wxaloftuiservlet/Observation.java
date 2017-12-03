@@ -12,7 +12,7 @@ public class Observation
     private double latitude, longitude;
     private String details;
 
-    public Observations(double lat, double lon, int id, String details)
+    public Observation(double lat, double lon, int id, String details)
     {
         latitude = lat;
         longitude = lon;
@@ -56,6 +56,10 @@ public class Observation
         return details;
     }
 
+    /*
+     * Note that (contrary to normal practice) this is already fully
+     * entity-escaped; do not fn:excapeXml it.
+     */
     public void setDetails(String value)
     {
         details = value;

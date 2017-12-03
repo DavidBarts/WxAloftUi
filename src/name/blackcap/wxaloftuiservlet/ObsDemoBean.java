@@ -6,6 +6,7 @@ import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.TimeZone;
 import java.util.logging.Level;
@@ -35,7 +36,7 @@ public class ObsDemoBean
         UTC_TIME.setTimeZone(TimeZone.getTimeZone("GMT"));
     }
 
-    private static final String DEFAULT_DURATION = "P2H";
+    private static final String DEFAULT_DURATION = "PT2H";
     private int areaId;
     private double north, south, east, west;
     private ArrayList<Observation> observations;
@@ -45,12 +46,13 @@ public class ObsDemoBean
 
     private boolean hasBounds;
     private long since;
+    private Double myNorth, mySouth, myEast, myWest;
 
     public ObsDemoBean()
     {
         areaId = -1;
         north = south = east = west = 0.0;
-        observations = new ArrayList<ObservationData>();
+        observations = new ArrayList<Observation>();
         since = 0L;
         mapParams = rawDuration = null;
     }
@@ -59,13 +61,13 @@ public class ObsDemoBean
     {
         /* get and parse the optional since parameter */
         rawDuration = req.getParameter("since");
-        if (rawDuration == null) {
+        if (rawDuration == null)
             rawDuration = DEFAULT_DURATION;
         Duration d = null;
         try {
             d = Duration.parse(rawDuration);
         } catch (DateTimeParseException e) {
-            Logger.log(Level.SEVERE, "Invalid duration", e);
+            LOGGER.log(Level.SEVERE, "Invalid duration", e);
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Bad request (invalid duration)");
             return false;
         }
@@ -73,11 +75,11 @@ public class ObsDemoBean
             Math.abs(d.getSeconds() * 1000 + d.getNano() / 1000000);
 
         /* get specified bounds, if they exist */
-        Session sess = req.getSession();
-        Double myNorth = getDouble(req, "north");
-        Double mySouth = getDouble(req, "south");
-        Double myEast = getDouble(req, "east");
-        Double myWest = getDouble(req, "west");
+        HttpSession sess = req.getSession();
+        myNorth = getDouble(req, "north");
+        mySouth = getDouble(req, "south");
+        myEast = getDouble(req, "east");
+        myWest = getDouble(req, "west");
 
         /* if bounds were not completely specified, (a) it doesn't count, and
            (b) we wipe the session bounds clean, else use them to limit the
@@ -91,14 +93,14 @@ public class ObsDemoBean
             sess.removeAttribute("west");
         } else {
             hasBounds = true;
-            north = (double) sess.getAttribute(north);
+            north = (double) sess.getAttribute("north");
             myNorth = Math.min(north, myNorth);
-            south = (double) sess.getAttribute(south);
+            south = (double) sess.getAttribute("south");
             mySouth = Math.max(south, mySouth);
-            east = (double) sess.getAttribute(east);
+            east = (double) sess.getAttribute("east");
             if (LatLong.eastOf(myEast, east))
                 myEast = east;
-            west = (double) sess.getAttribute(west);
+            west = (double) sess.getAttribute("west");
             if (LatLong.westOf(myWest, west))
                 myWest = west;
         }
@@ -117,7 +119,7 @@ public class ObsDemoBean
         /* get the mandatory area and translate it into a numeric ID */
         String area = req.getParameter("area");
         if (area == null) {
-            LOGGER.log(level.SEVERE, "Missing area= parameter");
+            LOGGER.log(Level.SEVERE, "Missing area= parameter");
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Bad request (missing area= parameter)");
             return false;
         }
@@ -143,14 +145,14 @@ public class ObsDemoBean
 
         /* get terminal latitude, longitude, time zone */
         SimpleDateFormat dFormat = (SimpleDateFormat) LOCAL_TIME.clone();
-        double termLatitude = 0.0, termLongitude = 0.0;
+        double termLat = 0.0, termLong = 0.0;
         try (PreparedStatement stmt = conn.prepareStatement("select latitude, longitude, timezone from areas where id = ?")) {
             stmt.setInt(1, areaId);
             ResultSet rs = stmt.executeQuery();
             if (!rs.next()) {
                 LOGGER.log(Level.SEVERE, String.format("Area ID %s unknown", areaId));
                 resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Internal server error (area ID unknown)");
-                return;
+                return false;
             }
             termLat = rs.getDouble(1);
             termLong = rs.getDouble(2);
@@ -158,7 +160,7 @@ public class ObsDemoBean
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Unable to get terminal location", e);
             resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Internal server error (unable to get terminal location)");
-            return;
+            return false;
         }
 
         /* get some starting bounds if we need them */
@@ -170,16 +172,15 @@ public class ObsDemoBean
         }
 
         /* read in stuff from database and possibly determine map extents */
-        int firstId = 0, lastId = 0;
+        int firstId = -1, lastId = -1;
         try (PreparedStatement stmt = conn.prepareStatement("select observations.id, observations.received, observations.observed, observations.frequency, observations.altitude, observations.wind_speed, observations.wind_dir, observations.temperature, observations.source, observations.latitude, observations.longitude from observations join obs_area on observations.id = obs_area.observation_id where observations.observed > ? and obs_area.area_id = ? order by observations.id asc")) {
             stmt.setTimestamp(1, new Timestamp(since));
             stmt.setInt(2, areaId);
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
-                int id = rs.getInt(1);
-                to = id;
-                if (from == 0)
-                    from = id;
+                lastId = rs.getInt(1);
+                if (firstId == -1)
+                    firstId = lastId;
                 Date received = new Date(rs.getTimestamp(2).getTime());
                 Date observed = new Date(rs.getTimestamp(3).getTime());
                 double frequency = rs.getDouble(4);
@@ -194,9 +195,8 @@ public class ObsDemoBean
                 if (rs.wasNull()) source = null;
                 double latitude = rs.getDouble(10);
                 double longitude = rs.getDouble(11);
-                boolean skip = hasBounds && ;
                 if (hasBounds) {
-                    if (latitude > myNorth || latitude < mySouth || LatLong.westOf(longitude, myWest) || latLong.eastOf(longitude, myEast)) {
+                    if (latitude > myNorth || latitude < mySouth || LatLong.westOf(longitude, myWest) || LatLong.eastOf(longitude, myEast)) {
                         continue;
                     }
                 } else {
@@ -210,7 +210,7 @@ public class ObsDemoBean
                         myWest = longitude;
                 }
                 /* browsers use \r to indicate line breaks in tool tips */
-                String details = String.join("\r", new String[] {
+                String details = escapeIt(String.join("\r", new String[] {
                     listIt("Altitude", altitude, " ft"),
                     listIt("Latitude", latitude, "°"),
                     listIt("Longitude", longitude, "°"),
@@ -219,10 +219,14 @@ public class ObsDemoBean
                     listIt("Wind speed", wind_speed, " kn"),
                     listIt("Time observed", dFormat.format(observed), ""),
                     listIt("Time received", dFormat.format(received), ""),
-                    listIt("Frequency", obs[i].frequency, " MHz"),
-                    listIt("Source", obs[i].source, "") });
-                observations.add(new Observation(latitude, longitude, id, details));
+                    listIt("Frequency", frequency, " MHz"),
+                    listIt("Source", source, "") }));
+                observations.add(new Observation(latitude, longitude, lastId, details));
             }
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Unable to read observations", e);
+            resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Internal server error (unable to read observations)");
+            return false;
         }
 
         /* get mapParams */
@@ -238,9 +242,28 @@ public class ObsDemoBean
             o.setY(dummy.latToPixel(o.getLatitude()));
             o.setX(dummy.longToPixel(o.getLongitude()));
         }
+        return true;
     }
 
-    function listIt(String name, Object value, String suffix)
+    private String escapeIt(String raw)
+    {
+        final String TOXIC = "\"&'<>";
+        int length = raw.length();
+        StringBuffer sb = new StringBuffer((int) (length * 1.25));
+        for (int i=0; i<length; i++) {
+            char ch = raw.charAt(i);
+            if (Character.isISOControl(ch) || Character.getType(ch) == Character.CONTROL || TOXIC.indexOf(ch) != -1) {
+                sb.append("&#");
+                sb.append((int) ch);
+                sb.append(';');
+            } else {
+                sb.append(ch);
+            }
+        }
+        return sb.toString();
+    }
+
+    private String listIt(String name, Object value, String suffix)
     {
         if (value == null)
             return name + ": (missing)";
@@ -278,7 +301,7 @@ public class ObsDemoBean
         return GetMap.RADIUS;
     }
 
-    public new List<Observation>() getObservations()
+    public List<Observation> getObservations()
     {
         return observations;
     }
