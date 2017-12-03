@@ -8,11 +8,12 @@ package name.blackcap.wxaloftuiservlet;
  */
 public class Observation
 {
-    private int id, x, y;
+    private long id;
+    private int x, y;
     private double latitude, longitude;
     private String details;
 
-    public Observation(double lat, double lon, int id, String details)
+    public Observation(double lat, double lon, long id, String details)
     {
         latitude = lat;
         longitude = lon;
@@ -41,12 +42,12 @@ public class Observation
         longitude = value;
     }
 
-    public int getId()
+    public long getId()
     {
         return id;
     }
 
-    public void setId(int value)
+    public void setId(long value)
     {
         id = value;
     }

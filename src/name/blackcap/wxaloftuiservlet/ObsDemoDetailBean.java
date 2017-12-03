@@ -109,7 +109,7 @@ public class ObsDemoDetailBean
             int altitude = rs.getInt(4);
             Short wind_speed = rs.getShort(5);
             if (rs.wasNull()) wind_speed = null;
-            Short wind_dir = rs.getShort(7);
+            Short wind_dir = rs.getShort(6);
             if (rs.wasNull()) wind_dir = null;
             Float temperature = rs.getFloat(7);
             if (rs.wasNull()) temperature = null;

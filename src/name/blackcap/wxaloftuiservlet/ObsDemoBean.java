@@ -174,17 +174,18 @@ public class ObsDemoBean
         }
 
         /* read in stuff from database and possibly determine map extents */
-        int firstId = -1, lastId = -1;
+        long first = -1L, last = -1L;
         try (PreparedStatement stmt = conn.prepareStatement("select observations.id, observations.received, observations.observed, observations.frequency, observations.altitude, observations.wind_speed, observations.wind_dir, observations.temperature, observations.source, observations.latitude, observations.longitude from observations join obs_area on observations.id = obs_area.observation_id where observations.observed > ? and obs_area.area_id = ? order by observations.id asc")) {
             stmt.setTimestamp(1, new Timestamp(since));
             stmt.setInt(2, areaId);
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
-                lastId = rs.getInt(1);
-                if (firstId == -1)
-                    firstId = lastId;
+                long id = rs.getLong(1);
                 Date received = new Date(rs.getTimestamp(2).getTime());
-                Date observed = new Date(rs.getTimestamp(3).getTime());
+                last = rs.getTimestamp(3).getTime();
+                if (first == -1L)
+                    first = last;
+                Date observed = new Date(last);
                 double frequency = rs.getDouble(4);
                 int altitude = rs.getInt(5);
                 Short wind_speed = rs.getShort(6);
@@ -223,7 +224,7 @@ public class ObsDemoBean
                     listIt("Time received", dFormat.format(received), ""),
                     listIt("Frequency", frequency, " MHz"),
                     listIt("Source", source, "") }));
-                observations.add(new Observation(latitude, longitude, lastId, details));
+                observations.add(new Observation(latitude, longitude, id, details));
             }
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Unable to read observations", e);
@@ -232,7 +233,7 @@ public class ObsDemoBean
         }
 
         /* get mapParams */
-        mapParams = String.format("?from=%d&to=%d&area=%d", firstId, lastId, areaId);
+        mapParams = String.format("?from=%d&to=%d&area=%d", first, last, areaId);
         if (hasBounds)
             mapParams = String.format("%s&south=%f&west=%f&north=%f&east=%f", mapParams, mySouth, myWest, myNorth, myEast);
 

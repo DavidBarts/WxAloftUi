@@ -15,7 +15,12 @@
       table, th, td { border: none }
       th, td { text-align: center }
       table { width: 100% }
-      .centered { display: block; margin-left: auto; margin-right: auto }
+      .obsmap {
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+        border: 1px solid black
+      }
     </style>
   </head>
 
@@ -29,7 +34,7 @@
     <!-- need zoom and pan controls (links) -->
     <img src="/WxAloftUi/GetMap${fn:escapeXml(obsDemo.mapParams)}"
       alt="Map may take a moment to load, hang on..." border="0"
-      usemap="#observations" class="centered" />
+      usemap="#observations" class="obsmap" />
     <map name="observations">
       <c:forEach var="observation" items="${obsDemo.observations}">
         <area shape="circle" coords="${observation.x},${observation.y},${obsDemo.radius}"

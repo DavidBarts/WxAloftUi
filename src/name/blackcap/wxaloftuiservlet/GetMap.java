@@ -58,10 +58,10 @@ public class GetMap extends HttpServlet {
     private void doGetWithConnection(HttpServletRequest req, HttpServletResponse resp, Connection conn) throws IOException
     {
         /* get (mandatory) database bounds */
-        Integer from = null, to = null;
+        Long from = null, to = null;
         try {
-            from = getInteger(req, "from");
-            to = getInteger(req, "to");
+            from = getLong(req, "from");
+            to = getLong(req, "to");
         } catch (NumberFormatException e) {
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Bad request (invalid integer)");
             return;
@@ -157,9 +157,10 @@ public class GetMap extends HttpServlet {
 
         /* get the data to plot */
         ArrayList<AcarsObservation> obs = new ArrayList<AcarsObservation>();
-        try (PreparedStatement stmt = conn.prepareStatement("select latitude, longitude, altitude, observed from observations where id >= ? and id <= ?")) {
-            stmt.setInt(1, from);
-            stmt.setInt(2, to);
+        try (PreparedStatement stmt = conn.prepareStatement("select observations.latitude, observations.longitude, observations.altitude, observations.observed from observations join obs_area on observations.id = obs_area.observation_id where observations.observed >= ? and observations.observed <= ? and obs_area.area_id = ?")) {
+            stmt.setTimestamp(1, new Timestamp(from));
+            stmt.setTimestamp(2, new Timestamp(to));
+            stmt.setInt(3, areaId);
             ResultSet rs = stmt.executeQuery();
             while (rs.next())
                 obs.add(new AcarsObservation(rs.getDouble(1), rs.getDouble(2), rs.getInt(3), new Date(rs.getTimestamp(4).getTime())));
@@ -301,12 +302,12 @@ public class GetMap extends HttpServlet {
         return new Double(raw);
     }
 
-    private Integer getInteger(HttpServletRequest req, String name)
+    private Long getLong(HttpServletRequest req, String name)
     {
         String raw = req.getParameter(name);
         if (raw == null)
             return null;
-        return new Integer(raw);
+        return new Long(raw);
     }
 
     private Connection getConnection() throws NamingException, SQLException {
