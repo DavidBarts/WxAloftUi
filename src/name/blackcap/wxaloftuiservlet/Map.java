@@ -241,8 +241,6 @@ public class Map {
         }
 
         // Done?!
-        System.out.format("nmargin=%d, smargin=%d, emargin=%d, wmargin=%d%n",
-            nmargin, smargin, emargin, wmargin);
         return new Map(
             psouth + smargin, dummy.normalizeX(pwest - wmargin),
             pnorth - nmargin, dummy.normalizeX(peast + emargin),
@@ -333,28 +331,26 @@ public class Map {
             BufferedImage.TYPE_INT_RGB);
         Graphics g = rawImage.getGraphics();
 
-        // Get bounds; we don't use exactly least/lsouth so as to defend
-        // against roundoff errors.
-        final double FUZZ = 0.0001;
-        double ebound = LatLong.normalizeLong(least + FUZZ);
-        double sbound = Math.max(-Tile.MAXLAT, lsouth - FUZZ);
-
         // Tile it
         Tile y = start;
         int xi = 0, yi = 0;
+        int yn = y.getY() << 8;
+        int xe1 = normalizeX((y.getX() + 1) << 8);
         do {
             g.drawImage(y.getImage(), xi, yi, null);
             Tile x = y;
-            while (LatLong.westOf(x.east(), ebound)) {
-                System.out.format("X=%d, long=%f, Y=%d, lat=%f%n", x.getX(), x.west(), x.getY(), x.north());
+            int xe = xe1;
+            while (eastFrom(xe, east) < eastFrom(east, xe)) {
                 x = x.eastTile();
                 xi += Tile.SIZE;
+                xe = normalizeX(xe + Tile.SIZE);
                 g.drawImage(x.getImage(), xi, yi, null);
             }
             xi = 0;
             yi += Tile.SIZE;
+            yn += Tile.SIZE;
             y = y.southTile();
-        } while (y != null && LatLong.northOf(y.north(), sbound));
+        } while (yn < south);
 
         // Crop it and return our image
         int cnorth = north - toPixel((double) start.getY());
