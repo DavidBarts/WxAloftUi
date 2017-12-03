@@ -53,6 +53,18 @@ public class Map {
     }
 
     /**
+     * Variant with bounds in an array of four ints.
+     *
+     * @param bounds    Array of four ints { S, W, N, E }
+     * @param zoom      Zoom level
+     * @param p         TileProvider to use
+     */
+    public Map(int[] bounds, int zoom, TileProvider p) {
+        initZoom(zoom);
+        init(bounds[0], bounds[1], bounds[2], bounds[3], p);
+    }
+
+    /**
      * Constructor that uses more traditional (and more user-friendly)
      * lat/long bounds.
      *
@@ -353,8 +365,8 @@ public class Map {
         } while (yn < south);
 
         // Crop it and return our image
-        int cnorth = north - toPixel((double) start.getY());
-        int cwest = eastFrom(toPixel((double) start.getX()), west);
+        int cnorth = north - (start.getY() << 8);
+        int cwest = eastFrom(start.getX() << 8, west);
         int cwidth = eastFrom(west, east);
         int cheight = south - north;
         return rawImage.getSubimage(cwest, cnorth, cwidth, cheight);
