@@ -6,7 +6,6 @@ import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.TimeZone;
 import java.util.logging.Level;
@@ -40,7 +39,7 @@ public class ObsDemoBean
     private int areaId;
     private double north, south, east, west;
     private ArrayList<Observation> observations;
-    private String mapParams, rawDuration;
+    private String mapParams, rawDuration, shortArea, longArea, sinceString;
     // private String zoomParams;
     // private String panNorthParams, panSouthParams, panEastParams, panWestParams;
 
@@ -54,7 +53,7 @@ public class ObsDemoBean
         north = south = east = west = 0.0;
         observations = new ArrayList<Observation>();
         since = 0L;
-        mapParams = rawDuration = null;
+        mapParams = rawDuration = shortArea = longArea = sinceString = null;
     }
 
     public boolean processRequest(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException
@@ -146,7 +145,7 @@ public class ObsDemoBean
         /* get terminal latitude, longitude, time zone */
         SimpleDateFormat dFormat = (SimpleDateFormat) LOCAL_TIME.clone();
         double termLat = 0.0, termLong = 0.0;
-        try (PreparedStatement stmt = conn.prepareStatement("select latitude, longitude, timezone from areas where id = ?")) {
+        try (PreparedStatement stmt = conn.prepareStatement("select name, city, region, country, timezone, latitude, longitude from areas where id = ?")) {
             stmt.setInt(1, areaId);
             ResultSet rs = stmt.executeQuery();
             if (!rs.next()) {
@@ -154,9 +153,12 @@ public class ObsDemoBean
                 resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Internal server error (area ID unknown)");
                 return false;
             }
-            termLat = rs.getDouble(1);
-            termLong = rs.getDouble(2);
-            dFormat.setTimeZone(TimeZone.getTimeZone(rs.getString(3)));
+            shortArea = rs.getString(1);
+            longArea = String.format("%s, %s, %s", rs.getString(2), rs.getString(3), rs.getString(4));
+            dFormat.setTimeZone(TimeZone.getTimeZone(rs.getString(5)));
+            sinceString = dFormat.format(new Date(since));
+            termLat = rs.getDouble(6);
+            termLong = rs.getDouble(7);
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Unable to get terminal location", e);
             resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Internal server error (unable to get terminal location)");
@@ -304,5 +306,20 @@ public class ObsDemoBean
     public List<Observation> getObservations()
     {
         return observations;
+    }
+
+    public String getShortArea()
+    {
+        return shortArea;
+    }
+
+    public String getLongArea()
+    {
+        return longArea;
+    }
+
+    public String getSince()
+    {
+        return sinceString;
     }
 }

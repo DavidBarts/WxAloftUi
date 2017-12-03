@@ -11,37 +11,32 @@
 <html>
   <head>
     <title>JSP Observations Demo</title>
+    <style type="text/css">
+      table, th, td { border: none }
+      th, td { text-align: center }
+      table { width: 100% }
+      .centered { display: block; margin-left: auto; margin-right: auto }
+    </style>
   </head>
 
   <body>
+    <h1><c:out value="${obsDemo.shortArea}"/> Weather Observatons</h1>
+    <p>This map shows observations taken by aircraft in the
+    <c:out value="${obsDemo.longArea}"/> area since
+    <c:out value="${obsDemo.since}"/>. Hover over or click on
+    the dots (color-coded by elevation) to see the details of each
+    observation.</p>
     <!-- need zoom and pan controls (links) -->
-    <form method="GET" action="obs_demo.jsp">
-      <input type="hidden" name="area" value="${obsDemo.areaId}" />
-      <c:if test="${not empty param.since}">
-        <input type="hidden" name="since" value="${param.since}" />
-      </c:if>
-      <c:if test="${not empty param.north}">
-        <input type="hidden" name="north" value="${param.north}" />
-      </c:if>
-      <c:if test="${not empty param.south}">
-        <input type="hidden" name="south" value="${param.south}" />
-      </c:if>
-      <c:if test="${not empty param.east}">
-        <input type="hidden" name="east" value="${param.east}" />
-      </c:if>
-      <c:if test="${not empty param.west}">
-        <input type="hidden" name="west" value="${param.west}" />
-      </c:if>
-      <img src="/WxAloftUi/GetMap${fn:escapeXml(obsDemo.mapParams)}"
-        alt="usemap" border="0" usemap="#observations" />
-      <map name="observations">
-        <c:forEach var="observation" items="${obsDemo.observations}">
-          <area shape="circle" coords="${observation.x},${observation.y},${obsDemo.radius}"
-            href="obs_demo_detail.jsp?id=${observation.id}"
-            title="${observation.details}" />
-        </c:forEach>
-      </map>
-    </form>
+    <img src="/WxAloftUi/GetMap${fn:escapeXml(obsDemo.mapParams)}"
+      alt="Map may take a moment to load, hang on..." border="0"
+      usemap="#observations" class="centered" />
+    <map name="observations">
+      <c:forEach var="observation" items="${obsDemo.observations}">
+        <area shape="circle" coords="${observation.x},${observation.y},${obsDemo.radius}"
+          href="obs_demo_detail.jsp?area=${obsDemo.areaId}&amp;id=${observation.id}"
+          title="${observation.details}" />
+      </c:forEach>
+    </map>
     <!-- may need pan down control here -->
   </body>
 </html>
