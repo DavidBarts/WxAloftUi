@@ -443,7 +443,7 @@ public class Map {
     }
 
     /**
-     * Get eastmost pixel coordinate.
+     * Get eastmost world pixel coordinate.
      *
      * @return          Pixel coordinate.
      */
@@ -453,7 +453,7 @@ public class Map {
     }
 
     /**
-     * Get westmost pixel coordinate.
+     * Get westmost world pixel coordinate.
      *
      * @return          Pixel coordinate.
      */
@@ -463,7 +463,7 @@ public class Map {
     }
 
     /**
-     * Return northmost pixel coordinate.
+     * Return northmost world pixel coordinate.
      *
      * @return          Pixel coordinate.
      */
@@ -473,7 +473,7 @@ public class Map {
     }
 
     /**
-     * Return southmost pixel coordinate.
+     * Return southmost world pixel coordinate.
      *
      * @return          Pixel coordinate.
      */
