@@ -122,8 +122,7 @@ public class Map {
         this.east = east;
 
         /* get a starting tile */
-        this.start = new Tile((int) toTileXY(west), (int) toTileXY(north),
-            zoom, p);
+        this.start = new Tile(west >> 8, north >> 8, zoom, p);
 
         /* get lat/long extents. note that these probably won't exactly match
            any passed to our lat/long constructor, due to pixellation */
