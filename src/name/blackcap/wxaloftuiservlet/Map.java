@@ -153,9 +153,7 @@ public class Map {
      */
     public int toPixel(double tilexy)
     {
-        int whole = (int) tilexy;
-        double frac = tilexy - (double) whole;
-        return (whole << 8) | (int) (frac * Tile.SIZE);
+        return (int) ((double) Tile.SIZE * tilexy);
     }
 
     /**
@@ -167,9 +165,7 @@ public class Map {
      */
     public double toTileXY(int pixel)
     {
-        double whole = (double) (pixel >> 8);
-        double frac = (double) (pixel & 0xff) / (double) Tile.SIZE;
-        return whole + frac;
+        return (double) pixel / (double) Tile.SIZE;
     }
 
     /**
