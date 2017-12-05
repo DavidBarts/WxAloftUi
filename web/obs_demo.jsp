@@ -33,8 +33,8 @@
     observation.</p>
     <!-- need zoom and pan controls (links) -->
     <img src="/WxAloftUi/GetMap${fn:escapeXml(obsDemo.mapParams)}"
-      alt="Map may take a moment to load, hang on..." border="0"
-      usemap="#observations" class="obsmap" />
+      alt="Map may take a moment to load, hang on..." usemap="#observations"
+      class="obsmap" />
     <map name="observations">
       <c:forEach var="observation" items="${obsDemo.observations}">
         <area shape="circle" coords="${observation.x},${observation.y},${obsDemo.radius}"
