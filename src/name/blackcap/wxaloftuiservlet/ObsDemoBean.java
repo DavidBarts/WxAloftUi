@@ -112,7 +112,7 @@ public class ObsDemoBean
         }
     }
 
-    /* XXX: this duplicates logic in GetMap.java and ObsDemo.java */
+    /* FIXME: This duplicates logic in GetMap.java and ObsDemo.java */
     public boolean processWithConnection(HttpServletRequest req, HttpServletResponse resp, Connection conn) throws IOException
     {
         /* get the mandatory area and translate it into a numeric ID */

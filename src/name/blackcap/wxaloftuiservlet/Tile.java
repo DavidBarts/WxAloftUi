@@ -116,6 +116,8 @@ public class Tile
         return image;
     }
 
+    /* FIXME: probably should be replaced by one or more functions in
+       a world pixel calculations class */
     /**
      * Convert tilespace x coordinate to longitude.
      *
@@ -150,6 +152,8 @@ public class Tile
         return toLongitude((double) ex);
     }
 
+    /* FIXME: probably should be replaced by one or more functions in
+       a world pixel calculations class */
     /**
      * Convert tilespace y coordinate to latitude
      *
@@ -234,6 +238,8 @@ public class Tile
         return new Tile(x, sy, zoom, p);
     }
 
+    /* FIXME: probably should be replaced by one or more functions in
+       a world pixel calculations class */
     /**
      * Convert longitude to tilespace coordinate.
      *
@@ -255,6 +261,8 @@ public class Tile
         return ret;
     }
 
+    /* FIXME: probably should be replaced by one or more functions in
+       a world pixel calculations class */
     /**
      * Convert latitude to tilespace coordinate.
      *

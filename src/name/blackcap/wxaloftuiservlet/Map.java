@@ -38,7 +38,13 @@ public class Map {
      * A raster-based map, with extents specified in world pixels. Each
      * pixel in each tile at each zoom level has its own unique world
      * pixel coordinates. World pixels start with (0,0) at
-     * 180 W, Tile.MAXLAT N and increase going south and east.
+     * 180 W, Tile.MAXLAT N and increase going south and east. I.e. world
+     * pixels are 32-bit integers with the following usage of bits:
+     *       xxxxxx tttttttttttttttttt pppppppp
+     *   MSB 31  26 25               8 7      0 LSB
+     * x = currently unused (always 0)
+     * t = tile number, max of 2**Z - 1 at zoom level Z
+     * p = pixel number in tile, 0-255
      *
      * @param south     Southernmost extent
      * @param west      Westernmost extent
@@ -143,6 +149,8 @@ public class Map {
         this.numPixels = 1 << (zoom + 8);
     }
 
+    /* FIXME: should be in Tile.java or a class decicated to world pixel
+       calculations, not here */
     /**
      * Convert a tile X or Y coordinate into world pixels. Does not
      * sanity-check its argument.
@@ -155,6 +163,8 @@ public class Map {
         return (int) ((double) Tile.SIZE * tilexy);
     }
 
+    /* FIXME: should be in Tile.java or a class decicated to world pixel
+       calculations, not here */
     /**
      * Convert a world pixel coordinate into a tile X or Y coordinate.
      * Does not sanity-check its argument.
@@ -201,6 +211,8 @@ public class Map {
         int width = size[0];
         int height = size[1];
 
+        /* FIXME: this should use world pixels and successive shifting
+           to determine the zoom level */
         // Determine zoom level
         int psouth = -1, pwest = -1, pnorth = -1, peast = -1;
         int zoom = 0;
@@ -254,6 +266,8 @@ public class Map {
             dummy.getZoom(), p);
     }
 
+    /* FIXME: should be in a separate class dedicated to world pixel
+       calculations, not here. */
     /**
      * How far it is (in world pixels) if you head east from start to finish.
      * You will always get there, just sometimes the long way 'round...
@@ -274,6 +288,8 @@ public class Map {
             return numPixels - start + end;
     }
 
+    /* FIXME: should be in a separate class dedicated to world pixel
+       calculations, not here. */
     /**
      * Normalize an X world pixel coordinate. Necessary after any addition
      * or subtraction.
@@ -373,6 +389,8 @@ public class Map {
         return Tile.SIZE * ((pixels - 1) / Tile.SIZE + 1 + SLOP);
     }
 
+    /* FIXME: The following two methods should be in a separate class
+       dealing with world pixel calculations, not here. */
     /**
      * Translate latitude to output image pixel coordinate. Does not
      * sanity-check its argument.
