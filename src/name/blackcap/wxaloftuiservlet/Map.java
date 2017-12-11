@@ -8,6 +8,8 @@ import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import static name.blackcap.wxaloftuiservlet.WorldPixel.*;
+
 /**
  * A raster-based map that uses tiles from the OSM tile server. Things that
  * accept lat/long arguments tend to do sanity checks which make it
@@ -52,6 +54,9 @@ public class Map {
      * @param east      Easternmost extent
      * @param zoom      Zoom level
      * @param p         TileProvider to use
+     *
+     * Note: the northernmost and westernmost extents are inclusive; the
+     * southernmost and easternmost extents are exclusive.
      */
     public Map(int south, int west, int north, int east, int zoom, TileProvider p) {
         initZoom(zoom);
@@ -66,8 +71,7 @@ public class Map {
      * @param p         TileProvider to use
      */
     public Map(int[] bounds, int zoom, TileProvider p) {
-        initZoom(zoom);
-        init(bounds[0], bounds[1], bounds[2], bounds[3], p);
+        this(bounds[0], bounds[1], bounds[2], bounds[3], zoom, p);
     }
 
     /**
@@ -83,13 +87,12 @@ public class Map {
      */
     public Map(double south, double west, double north, double east, int zoom, TileProvider p)
     {
-        sanityCheck(south, west, north, east);
+        int psouth = fromLatitude(south, zoom);
+        int pwest = fromLongitude(west, zoom);
+        int pnorth = fromLatitude(north, zoom);
+        int peast = fromLatitude(east, zoom);
         initZoom(zoom);
-        Tile convert = new Tile(0, 0, zoom, null);
-        init(
-            toPixel(convert.toTileY(south)), toPixel(convert.toTileX(west)),
-            toPixel(convert.toTileY(north)), toPixel(convert.toTileX(east)),
-            p);
+        init(psouth, pwest, pnorth, peast, p);
     }
 
     /**
@@ -117,7 +120,7 @@ public class Map {
         if (south <= north)
             throw new IllegalArgumentException(
                 String.format("%d not south of %d!", south, north));
-        if (eastFrom(east, west) < eastFrom(west, east))
+        if (!eastOf(east, west, zoom))
             throw new IllegalArgumentException(
                 String.format("%d not east of %d!", east, west));
 
@@ -128,14 +131,14 @@ public class Map {
         this.east = east;
 
         /* get a starting tile */
-        this.start = new Tile(west >> 8, north >> 8, zoom, p);
+        this.start = new Tile(getTile(west), getTile(north), zoom, p);
 
         /* get lat/long extents. note that these probably won't exactly match
            any passed to our lat/long constructor, due to pixellation */
-        lsouth = start.toLatitude(toTileXY(south));
-        lwest = start.toLongitude(toTileXY(west));
-        lnorth = start.toLatitude(toTileXY(north));
-        least = start.toLongitude(toTileXY(east));
+        lsouth = toLatitude(south, zoom);
+        lwest = toLongitude(west, zoom);
+        lnorth = toLatitude(north, zoom);
+        least = toLongitude(east, zoom);
 
         /* we haven't rendered anything yet */
         image = null;
@@ -143,54 +146,16 @@ public class Map {
 
     private void initZoom(int zoom)
     {
-        if (zoom < 0 || zoom > Tile.MAXZOOM)
+        if (zoom < 0 || zoom > MAXZOOM)
             throw new IllegalArgumentException("invalid zoom " + zoom);
         this.zoom = zoom;
-        this.numPixels = 1 << (zoom + 8);
-    }
-
-    /* FIXME: should be in Tile.java or a class decicated to world pixel
-       calculations, not here */
-    /**
-     * Convert a tile X or Y coordinate into world pixels. Does not
-     * sanity-check its argument.
-     *
-     * @param tilexy    Tilespace coordinate.
-     * @return          World pixel coordinate.
-     */
-    public int toPixel(double tilexy)
-    {
-        return (int) ((double) Tile.SIZE * tilexy);
-    }
-
-    /* FIXME: should be in Tile.java or a class decicated to world pixel
-       calculations, not here */
-    /**
-     * Convert a world pixel coordinate into a tile X or Y coordinate.
-     * Does not sanity-check its argument.
-     *
-     * @param           World pixel coordinate.
-     * @return          Tilespace coordinate.
-     */
-    public double toTileXY(int pixel)
-    {
-        return (double) pixel / (double) Tile.SIZE;
-    }
-
-    /**
-     * Get the number of pixels in each direction in world pixel space.
-     *
-     * @return          Number of pixels
-     */
-    public int getNumPixels()
-    {
-        return numPixels;
+        this.numPixels = makePixel(1 << zoom, 0);
     }
 
     /**
      * Given lat/long bounds and an image size, return a map that will
      * render to the specified size and include all the specified bounds.
-     * Returns null if asked to to the impossible (e.g. render a map so
+     * Returns null if asked to do the impossible (e.g. render a map so
      * tiny that even zoom level 0 can't accommodate it, or render a
      * map for which no zoom level can fill the requested width and
      * height).
@@ -202,108 +167,58 @@ public class Map {
      */
     public static Map withSize(double[] bounds, int[] size, TileProvider p)
     {
-        // "Unzip" the arrays to meaningful variable names
-        double south = bounds[0];
-        double west  = bounds[1];
-        double north = bounds[2];
-        double east  = bounds[3];
-        sanityCheck(south, west, north, east);
+        // "Unzip" the arrays to zoom level 18 coordinates with meaningful
+        // names.
+        sanityCheck(bounds[0], bounds[1], bounds[2], bounds[3]);
+        int south = fromLatitude(bounds[0]);
+        int west = fromLongitude(bounds[1]);
+        int north = fromLatitude(bounds[2]);
+        int east = fromLongitude(bounds[3]);
         int width = size[0];
         int height = size[1];
 
-        /* FIXME: this should use world pixels and successive shifting
-           to determine the zoom level */
-        // Determine zoom level
-        int psouth = -1, pwest = -1, pnorth = -1, peast = -1;
-        int zoom = 0;
-        Map dummy = null;
-        do {
-            Tile c0 = new Tile(0, 0, zoom, null);
-            Map c1 = new Map(1, 0, 0, 1, zoom, null);
-            int npsouth = c1.toPixel(c0.toTileY(south));
-            int npwest = c1.toPixel(c0.toTileX(west));
-            int npnorth = c1.toPixel(c0.toTileY(north));
-            int npeast = c1.toPixel(c0.toTileX(east));
-            if ((npsouth - npnorth) >= height || c1.eastFrom(npwest, npeast) >= width)
+        // Determine zoom level and get coordinates in that zoom level
+        // (bit shifting world pixel coordinates zooms them).
+        int zoom;
+        for (zoom = MAXZOOM; zoom >= 0; --zoom) {
+            if ((south - north) <= height && eastFrom(west, east, zoom) <= width)
                 break;
-            psouth = npsouth;
-            pwest = npwest;
-            pnorth = npnorth;
-            peast = npeast;
-            dummy = c1;
-        } while (zoom++ < Tile.MAXZOOM);
+            south >>= 1;
+            west >>= 1;
+            north >>= 1;
+            east >>= 1;
+        }
 
         // Check if caller requested the impossible
-        if (dummy == null)
+        if (zoom < 0 || south == north || east == west)
             return null;
-        if (width > dummy.getNumPixels() || height > dummy.getNumPixels())
+        int numPixels = makePixel(1 << zoom, 0);
+        if (width > numPixels || height > numPixels)
             return null;
 
         // Unless we're *really* lucky, the scale we get will almost always
         // result in a map with at least one dimension being smaller than
         // requested.
-        int xswidth = width - dummy.eastFrom(pwest, peast);
-        int xsheight = height - (psouth - pnorth);
+        int xswidth = width - eastFrom(west, east, zoom);
+        int xsheight = height - (south - north);
         int nmargin = xsheight / 2;
         int smargin = xsheight - nmargin;
         int wmargin = xswidth / 2;
         int emargin = xswidth - wmargin;
 
         // Longitude just wraps around but we can go too far north or south.
-        int xssmargin = psouth + smargin - dummy.getNumPixels() + 1;
+        int xssmargin = south + smargin - numPixels;
         if (xssmargin > 0) {
             smargin -= xssmargin;
             nmargin += xssmargin;
-        } else if (nmargin > pnorth) {
-            smargin += nmargin - pnorth;
-            nmargin = pnorth;
+        } else if (nmargin > north) {
+            smargin += nmargin - north;
+            nmargin = north;
         }
 
         // Done?!
-        return new Map(
-            psouth + smargin, dummy.normalizeX(pwest - wmargin),
-            pnorth - nmargin, dummy.normalizeX(peast + emargin),
-            dummy.getZoom(), p);
-    }
-
-    /* FIXME: should be in a separate class dedicated to world pixel
-       calculations, not here. */
-    /**
-     * How far it is (in world pixels) if you head east from start to finish.
-     * You will always get there, just sometimes the long way 'round...
-     *
-     * @param start     Starting longitude
-     * @param end       Ending longitude
-     * @return          Distance in pixels, always positive
-     */
-    public int eastFrom(int start, int end)
-    {
-        if (start < 0 || start >= numPixels)
-            throw new IllegalArgumentException("invalid start " + start);
-        if (end < 0 || end >= numPixels)
-            throw new IllegalArgumentException("invalid end " + end);
-        if (end >= start)
-            return end - start;
-        else
-            return numPixels - start + end;
-    }
-
-    /* FIXME: should be in a separate class dedicated to world pixel
-       calculations, not here. */
-    /**
-     * Normalize an X world pixel coordinate. Necessary after any addition
-     * or subtraction.
-     *
-     * @param x         An un-normalized X value.
-     * @return          Normalized X value
-     */
-    public int normalizeX(int unnormalized)
-    {
-        while (unnormalized >= numPixels)
-            unnormalized -= numPixels;
-        while (unnormalized < 0)
-            unnormalized += numPixels;
-        return unnormalized;
+        return new Map(south + smargin, normalizeX(west - wmargin, zoom),
+            north - nmargin, normalizeX(east + emargin, zoom), zoom, p);
     }
 
     /*
@@ -322,12 +237,12 @@ public class Map {
     }
     private static void sanityCheckLat(double latitude)
     {
-        if (Math.abs(latitude) > Tile.MAXLAT)
+        if (Math.abs(latitude) > MAXLAT)
             throw new IllegalArgumentException(String.format("invalid or unsupported latitude %f", latitude));
     }
     private static void sanityCheckLong(double longitude)
     {
-        if (Math.abs(longitude) > Tile.MAXLON)
+        if (Math.abs(longitude) > MAXLON)
             throw new IllegalArgumentException(String.format("invalid or unsupported longitude %f", longitude));
     }
 
@@ -348,37 +263,35 @@ public class Map {
     private BufferedImage makeImage() throws IOException
     {
         // Make a raw image
-        int SLOP = 2 * Tile.SIZE;
         BufferedImage rawImage = new BufferedImage(
-            calcSize(eastFrom(west, east)), calcSize(south - north),
+            calcSize(eastFrom(west, east, zoom)), calcSize(south - north),
             BufferedImage.TYPE_INT_RGB);
         Graphics g = rawImage.getGraphics();
 
         // Tile it
         Tile y = start;
         int xi = 0, yi = 0;
-        int yn = y.getY() << 8;
-        int xe1 = normalizeX((y.getX() + 1) << 8);
+        int yn = y.north();
         do {
             g.drawImage(y.getImage(), xi, yi, null);
             Tile x = y;
-            int xe = xe1;
-            while (eastFrom(xe, east) < eastFrom(east, xe)) {
+            int xe = y.east();
+            while (westOf(xe, east, zoom)) {
                 x = x.eastTile();
-                xi += Tile.SIZE;
-                xe = normalizeX(xe + Tile.SIZE);
+                xi += TILE_SIZE;
+                xe = normalizeX(xe + TILE_SIZE, zoom);
                 g.drawImage(x.getImage(), xi, yi, null);
             }
             xi = 0;
-            yi += Tile.SIZE;
-            yn += Tile.SIZE;
+            yi += TILE_SIZE;
+            yn += TILE_SIZE;
             y = y.southTile();
-        } while (yn < south);
+        } while (northOf(yn, south));
 
         // Crop it and return our image
-        int cnorth = north - (start.getY() << 8);
-        int cwest = eastFrom(start.getX() << 8, west);
-        int cwidth = eastFrom(west, east);
+        int cnorth = north - start.north();
+        int cwest = eastFrom(start.west(), west, zoom);
+        int cwidth = eastFrom(west, east, zoom);
         int cheight = south - north;
         return rawImage.getSubimage(cwest, cnorth, cwidth, cheight);
     }
@@ -386,11 +299,9 @@ public class Map {
     private int calcSize(int pixels)
     {
         int SLOP = 2;
-        return Tile.SIZE * ((pixels - 1) / Tile.SIZE + 1 + SLOP);
+        return TILE_SIZE * ((pixels - 1) / TILE_SIZE + 1 + SLOP);
     }
 
-    /* FIXME: The following two methods should be in a separate class
-       dealing with world pixel calculations, not here. */
     /**
      * Translate latitude to output image pixel coordinate. Does not
      * sanity-check its argument.
@@ -400,7 +311,7 @@ public class Map {
      */
     public int latToPixel(double latitude)
     {
-        return toPixel(start.toTileY(latitude)) - north;
+        return fromLatitude(latitude, zoom) - north;
     }
 
     /**
@@ -412,7 +323,7 @@ public class Map {
      */
     public int longToPixel(double longitude)
     {
-        return eastFrom(west, toPixel(start.toTileX(longitude)));
+        return eastFrom(west, fromLongitude(longitude, zoom), zoom);
     }
 
     /**

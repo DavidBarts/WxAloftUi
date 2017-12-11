@@ -1,8 +1,8 @@
 package name.blackcap.wxaloftuiservlet;
 
 /**
- * @author me@blackcap.name
- * @since 2017-11-27
+ * @author David Barts <n5jrn@me.com>
+ * @since 2017-12-10
  *
  * Static utilities for manipulating world pixel values. A world pixel
  * is represented by a 32 bit int:
@@ -87,6 +87,18 @@ public class WorldPixel
     public static int getTile(int pixel)
     {
         return pixel >> TILE_BITS;
+    }
+
+    /**
+     * Given a tile number and a tile pixel, return a world pixel.
+     *
+     * @param tileno    Tile number
+     * @param tilepix   Tile pixel
+     * @return          World pixel
+     */
+    public static int makePixel(int tileno, int tilepix)
+    {
+        return (tileno << TILE_BITS) | tilepix;
     }
 
     /**

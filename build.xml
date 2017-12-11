@@ -138,7 +138,7 @@
 
   <!-- run tests -->
   <target name="test" depends="prepare,compile">
-    <junit printsummary="on" haltonfailure="yes" fork="true" timeout="2000">
+    <junit printsummary="on" haltonfailure="yes">
       <formatter type="plain"/>
       <classpath refid="test.classpath"/>
       <batchtest todir="${reports.home}" unless="noTests">
