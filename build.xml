@@ -21,9 +21,11 @@
   <property name="app.name"      value="${ant.project.name}"/>
   <property name="work.home"     value="${basedir}/work"/>
   <property name="lib.home"      value="${basedir}/lib"/>
+  <property name="junit.lib.home"      value="${basedir}/junit-lib"/>
   <property name="src.home"      value="${basedir}/src"/>
   <property name="web.home"      value="${basedir}/web"/>
   <property name="dist.home"     value="${basedir}/dist"/>
+  <property name="reports.home"  value="${basedir}/reports"/>
 
   <!-- help message -->
   <target name="help">
@@ -35,6 +37,7 @@
     <echo>  compile : Compiles servlets into class files</echo>
     <echo>  dist    : Get things staged for installation</echo>
     <echo>  install : Install previously-staged webapp</echo>
+    <echo>  test    : Run unit tests.</echo>
     <echo> </echo>
     <echo>For example, to clean, compile, and package all at once, run:</echo>
     <echo>prompt> ant all </echo>
@@ -42,20 +45,30 @@
 
   <!-- Define the CLASSPATH -->
   <target name="classpath">
-    <path id="compile.classpath">
+    <path id="std.classpath">
       <fileset dir="${env.JRE_HOME}/lib">
         <include name="tools.jar"/>
       </fileset>
+      <fileset dir="${lib.home}">
+        <include name="*.jar"/>
+      </fileset>
+      <fileset dir="${junit.lib.home}">
+        <include name="*.jar"/>
+      </fileset>
+    </path>
+    <path id="compile.classpath">
+      <path refid="std.classpath"/>
       <fileset dir="${env.CATALINA_HOME}/bin">
         <include name="*.jar"/>
       </fileset>
       <fileset dir="${env.CATALINA_HOME}/lib">
         <include name="*.jar"/>
       </fileset>
-      <fileset dir="${lib.home}">
-        <include name="*.jar"/>
-      </fileset>
       <pathelement location="${src.home}"/>
+    </path>
+    <path id="test.classpath">
+      <path refid="std.classpath"/>
+      <pathelement location="${work.home}/WEB-INF/classes"/>
     </path>
   </target>
 
@@ -76,6 +89,7 @@
     <mkdir dir="${dist.home}/META-INF"/>
     <mkdir dir="${dist.home}/WEB-INF/classes"/>
     <mkdir dir="${dist.home}/WEB-INF/lib"/>
+    <mkdir dir="${reports.home}"/>
     <mkdir dir="${work.home}/WEB-INF/classes"/>
     <copy todir="${work.home}" preservelastmodified="true">
       <fileset dir="${web.home}"/>
@@ -97,7 +111,9 @@
   <target name="dist" depends="compile"
           description="Make the dist tree for the install target">
     <copy todir="${dist.home}" preservelastmodified="true">
-      <fileset dir="${work.home}"/>
+      <fileset dir="${work.home}">
+        <exclude name="**/*Test.*"/>
+      </fileset>
     </copy>
     <copy todir="${dist.home}/WEB-INF/lib" preservelastmodified="true">
       <fileset dir="${lib.home}">
@@ -118,6 +134,17 @@
           preservelastmodified="true">
       <fileset dir="${dist.home}"/>
     </copy>
+  </target>
+
+  <!-- run tests -->
+  <target name="test" depends="prepare,compile">
+    <junit printsummary="on" haltonfailure="yes" fork="true" timeout="2000">
+      <formatter type="plain"/>
+      <classpath refid="test.classpath"/>
+      <batchtest todir="${reports.home}" unless="noTests">
+        <fileset dir="${src.home}" includes="**/*Test.java"/>
+      </batchtest>
+    </junit>
   </target>
 
 </project>
