@@ -236,37 +236,44 @@ public class GetMap extends HttpServlet {
             resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Internal server error (unable to create map)");
             return;
         }
-        Graphics2D g = image.createGraphics();
-        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
-        final int DIAMETER = RADIUS * 2;
-        final int OFFSET = RADIUS;
-        for (AcarsObservation o : obs) {
-            int x = m.longToPixel(o.getLongitude()) - OFFSET;
-            if (badX(image, x) || badX(image, x + DIAMETER))
-                continue;
-            int y = m.latToPixel(o.getLatitude()) - OFFSET;
-            if (badY(image, y) || badY(image, y + DIAMETER))
-                continue;
-            g.setColor(getColor(o.getAltitude()));
-            g.fillOval(x, y, DIAMETER, DIAMETER);
-        }
+        Graphics2D g = null;
+        try {
+            g = image.createGraphics();
+            g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+            final int DIAMETER = RADIUS * 2;
+            final int OFFSET = RADIUS;
+            for (AcarsObservation o : obs) {
+                int x = m.longToPixel(o.getLongitude()) - OFFSET;
+                if (badX(image, x) || badX(image, x + DIAMETER))
+                    continue;
+                int y = m.latToPixel(o.getLatitude()) - OFFSET;
+                if (badY(image, y) || badY(image, y + DIAMETER))
+                    continue;
+                g.setColor(getColor(o.getAltitude()));
+                g.fillOval(x, y, DIAMETER, DIAMETER);
+            }
 
-        /* make note of the map extents if this is the first time we've
-           made a map this session */
-        if (!hasBounds) {
-            sess.setAttribute("north", north);
-            sess.setAttribute("south", south);
-            sess.setAttribute("east", east);
-            sess.setAttribute("west", west);
-        }
+            /* make note of the map extents if this is the first time we've
+               made a map this session */
+            if (!hasBounds) {
+                sess.setAttribute("north", north);
+                sess.setAttribute("south", south);
+                sess.setAttribute("east", east);
+                sess.setAttribute("west", west);
+            }
 
-        /* now return it */
-        resp.setStatus(200);
-        resp.setContentType("image/png");
-        OutputStream out = resp.getOutputStream();
-        ImageIO.write(image, "png", out);
-        out.flush();
+            /* now return it */
+            resp.setStatus(200);
+            resp.setContentType("image/png");
+            OutputStream out = resp.getOutputStream();
+            ImageIO.write(image, "png", out);
+            out.flush();
+        } finally {
+            if (g != null)
+                g.dispose();
+            image.flush();
+        }
     }
 
     private boolean badX(RenderedImage image, int x)

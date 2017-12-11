@@ -267,26 +267,29 @@ public class Map {
             calcSize(eastFrom(west, east, zoom)), calcSize(south - north),
             BufferedImage.TYPE_INT_RGB);
         Graphics g = rawImage.getGraphics();
-
-        // Tile it
-        Tile y = start;
-        int xi = 0, yi = 0;
-        int yn = y.north();
-        do {
-            g.drawImage(y.getImage(), xi, yi, null);
-            Tile x = y;
-            int xe = y.east();
-            while (westOf(xe, east, zoom)) {
-                x = x.eastTile();
-                xi += TILE_SIZE;
-                xe = normalizeX(xe + TILE_SIZE, zoom);
-                g.drawImage(x.getImage(), xi, yi, null);
-            }
-            xi = 0;
-            yi += TILE_SIZE;
-            yn += TILE_SIZE;
-            y = y.southTile();
-        } while (northOf(yn, south));
+        try {
+            // Tile it
+            Tile y = start;
+            int xi = 0, yi = 0;
+            int yn = y.north();
+            do {
+                g.drawImage(y.getImage(), xi, yi, null);
+                Tile x = y;
+                int xe = y.east();
+                while (westOf(xe, east, zoom)) {
+                    x = x.eastTile();
+                    xi += TILE_SIZE;
+                    xe = normalizeX(xe + TILE_SIZE, zoom);
+                    g.drawImage(x.getImage(), xi, yi, null);
+                }
+                xi = 0;
+                yi += TILE_SIZE;
+                yn += TILE_SIZE;
+                y = y.southTile();
+            } while (northOf(yn, south));
+        } finally {
+            g.dispose();
+        }
 
         // Crop it and return our image
         int cnorth = north - start.north();
