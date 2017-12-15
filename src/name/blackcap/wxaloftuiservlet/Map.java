@@ -301,7 +301,7 @@ public class Map {
 
     private int calcSize(int pixels)
     {
-        int SLOP = 2;
+        final int SLOP = 2;
         return TILE_SIZE * ((pixels - 1) / TILE_SIZE + 1 + SLOP);
     }
 

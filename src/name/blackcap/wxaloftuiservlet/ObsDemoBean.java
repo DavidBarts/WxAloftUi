@@ -21,6 +21,8 @@ import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 import name.blackcap.acarsutils.AcarsObservation;
 
+import static name.blackcap.wxaloftuiservlet.WorldPixel.*;
+
 /**
  * Backs the obs_demo.jsp page.
  *
@@ -37,7 +39,7 @@ public class ObsDemoBean
 
     private static final String DEFAULT_DURATION = "PT2H";
     private int areaId;
-    private double north, south, east, west;
+    private Integer north, south, east, west, zoom;
     private ArrayList<Observation> observations;
     private String mapParams, rawDuration, shortArea, longArea, sinceString;
     // private String zoomParams;
@@ -45,12 +47,11 @@ public class ObsDemoBean
 
     private boolean hasBounds;
     private long since;
-    private Double myNorth, mySouth, myEast, myWest;
 
     public ObsDemoBean()
     {
         areaId = -1;
-        north = south = east = west = 0.0;
+        north = south = east = west = zoom = 0;
         observations = new ArrayList<Observation>();
         since = 0L;
         mapParams = rawDuration = shortArea = longArea = sinceString = null;
@@ -74,34 +75,44 @@ public class ObsDemoBean
             Math.abs(d.getSeconds() * 1000 + d.getNano() / 1000000);
 
         /* get specified bounds, if they exist */
-        HttpSession sess = req.getSession();
-        myNorth = getDouble(req, "north");
-        mySouth = getDouble(req, "south");
-        myEast = getDouble(req, "east");
-        myWest = getDouble(req, "west");
+        north = getInteger(req, "north");
+        south = getInteger(req, "south");
+        east = getInteger(req, "east");
+        west = getInteger(req, "west");
+        zoom = getInteger(req, "zoom");
 
         /* if bounds were not completely specified, (a) it doesn't count, and
-           (b) we wipe the session bounds clean, else use them to limit the
-           bounds we just got fed */
+           (b) we wipe the session bounds clean, else use session bounds to
+           check the bounds we just got fed */
+        HttpSession sess = req.getSession();
         boolean hasBounds = false;
-        if (myNorth == null || mySouth == null || myEast == null || myWest == null) {
-            myNorth = mySouth = myEast = myWest = null;
+        if (north == null || south == null || east == null || west == null || zoom == null) {
             sess.removeAttribute("north");
             sess.removeAttribute("south");
             sess.removeAttribute("east");
             sess.removeAttribute("west");
+            sess.removeAttribute("zoom");
         } else {
+            Integer northLimit = (Integer) sess.getAttribute("north");
+            Integer southLimit = (Integer) sess.getAttribute("south");
+            Integer eastLimit = (Integer) sess.getAttribute("east");
+            Integer westLimit = (Integer) sess.getAttribute("west");
+            Integer zoomLimit = (Integer) sess.getAttribute("zoom");
+            if (northLimit == null || southLimit == null || eastLimit == null || westLimit == null || zoomLimit == null) {
+                resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Bad request (incomplete session)");
+                return false;
+            }
+            boolean invalidBounds =
+                northOf(toZoom(north, zoom, zoomLimit), northLimit) ||
+                southOf(toZoom(south, zoom, zoomLimit), southLimit) ||
+                eastOf(toZoom(east, zoom, zoomLimit), eastLimit, zoomLimit) ||
+                westOf(toZoom(west, zoom, zoomLimit), westLimit, zoomLimit);
+            boolean invalidZoom = zoom < zoomLimit || zoom > MAXZOOM;
+            if (invalidBounds || invalidZoom) {
+                resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Bad request (invalid bounds or zoom)");
+                return false;
+            }
             hasBounds = true;
-            north = (double) sess.getAttribute("north");
-            myNorth = Math.min(north, myNorth);
-            south = (double) sess.getAttribute("south");
-            mySouth = Math.max(south, mySouth);
-            east = (double) sess.getAttribute("east");
-            if (LatLong.eastOf(myEast, east))
-                myEast = east;
-            west = (double) sess.getAttribute("west");
-            if (LatLong.westOf(myWest, west))
-                myWest = west;
         }
 
         /* everythiong else requires a database connection, so... */
@@ -112,7 +123,6 @@ public class ObsDemoBean
         }
     }
 
-    /* FIXME: This duplicates logic in GetMap.java and ObsDemo.java */
     public boolean processWithConnection(HttpServletRequest req, HttpServletResponse resp, Connection conn) throws IOException
     {
         /* get the mandatory area and translate it into a numeric ID */
@@ -166,6 +176,7 @@ public class ObsDemoBean
         }
 
         /* get some starting bounds if we need them */
+        double myNorth = 0.0, mySouth = 0.0, myEast = 0.0, myWest = 0.0;
         if (!hasBounds) {
             myNorth = termLat + 0.125;
             mySouth = termLat - 0.125;
@@ -175,6 +186,7 @@ public class ObsDemoBean
 
         /* read in stuff from database and possibly determine map extents */
         long first = -1L, last = -1L;
+        ArrayList<Observation> all = new ArrayList<Observation>();
         try (PreparedStatement stmt = conn.prepareStatement("select observations.id, observations.received, observations.observed, observations.frequency, observations.altitude, observations.wind_speed, observations.wind_dir, observations.temperature, observations.source, observations.latitude, observations.longitude from observations join obs_area on observations.id = obs_area.observation_id where observations.observed > ? and obs_area.area_id = ? order by observations.id asc")) {
             stmt.setTimestamp(1, new Timestamp(since));
             stmt.setInt(2, areaId);
@@ -198,11 +210,7 @@ public class ObsDemoBean
                 if (rs.wasNull()) source = null;
                 double latitude = rs.getDouble(10);
                 double longitude = rs.getDouble(11);
-                if (hasBounds) {
-                    if (latitude > myNorth || latitude < mySouth || LatLong.westOf(longitude, myWest) || LatLong.eastOf(longitude, myEast)) {
-                        continue;
-                    }
-                } else {
+                if (!hasBounds) {
                     if (latitude > myNorth)
                         myNorth = latitude;
                     if (latitude < mySouth)
@@ -224,7 +232,7 @@ public class ObsDemoBean
                     listIt("Time received", dFormat.format(received), ""),
                     listIt("Frequency", frequency, " MHz"),
                     listIt("Source", source, "") }));
-                observations.add(new Observation(latitude, longitude, id, details));
+                all.add(new Observation(latitude, longitude, id, details));
             }
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Unable to read observations", e);
@@ -232,19 +240,43 @@ public class ObsDemoBean
             return false;
         }
 
-        /* get mapParams */
-        mapParams = String.format("?from=%d&to=%d&area=%d", first, last, areaId);
+        /* get map params and pixel addresses */
+        Map dummy = null;
         if (hasBounds)
-            mapParams = String.format("%s&south=%f&west=%f&north=%f&east=%f", mapParams, mySouth, myWest, myNorth, myEast);
-
-        /* get pixel addresses */
-        double[] extents = new double[] { mySouth, myWest, myNorth, myEast };
-        int[] size = new int[] { GetMap.PIXELS, GetMap.PIXELS };
-        Map dummy = Map.withSize(extents, size, null);
-        for (Observation o : observations) {
-            o.setY(dummy.latToPixel(o.getLatitude()));
-            o.setX(dummy.longToPixel(o.getLongitude()));
+            dummy = new Map(north, south, east, west, zoom, null);
+        else {
+            double[] extents = new double[] { mySouth, myWest, myNorth, myEast };
+            int[] size = new int[] { GetMap.PIXELS, GetMap.PIXELS };
+            dummy = Map.withSize(extents, size, null);
+            north = dummy.northPixel();
+            south = dummy.southPixel();
+            east = dummy.eastPixel();
+            west = dummy.westPixel();
+            zoom = dummy.getZoom();
+            HttpSession sess = req.getSession();
+            sess.setAttribute("north", north);
+            sess.setAttribute("south", south);
+            sess.setAttribute("east", east);
+            sess.setAttribute("west", west);
+            sess.setAttribute("zoom", zoom);
         }
+        int height = south - north;
+        int width = eastFrom(west, east);
+        for (Observation o : all) {
+            int y = dummy.latToPixel(o.getLatitude());
+            if (y < 0 || y > height)
+                continue;
+            int x = dummy.longToPixel(o.getLongitude());
+            if (x < 0 || x > width)
+                continue;
+            o.setY(y);
+            o.setX(x);
+            observations.add(o);
+        }
+
+        /* get mapParams and return */
+        mapParams = String.format("?from=%d&to=%d&area=%d&south=%d&west=%d&north=%d&east=%d&zoom=%d",
+            first, last, areaId, south, west, north, east, zoom);
         return true;
     }
 
@@ -281,12 +313,12 @@ public class ObsDemoBean
         return d.getConnection();
     }
 
-    private Double getDouble(HttpServletRequest req, String name)
+    private Integer getInteger(HttpServletRequest req, String name)
     {
         String raw = req.getParameter(name);
         if (raw == null)
             return null;
-        return new Double(raw);
+        return new Integer(raw);
     }
 
     public int getAreaId()

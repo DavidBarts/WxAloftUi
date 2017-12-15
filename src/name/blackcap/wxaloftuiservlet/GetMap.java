@@ -24,11 +24,11 @@ import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
 import name.blackcap.acarsutils.AcarsObservation;
 
+import static name.blackcap.wxaloftuiservlet.WorldPixel.*;
+
 /**
- * Retrieve a weather observations map, based on observation ID's and possibly
- * lat/long bounds. In order to prevent this service from being abused as a
- * general-purpose map source, the latter are only allowed if an existing
- * session contains maximum bounds and if they are within those bounds.
+ * Retrieve a weather observations map, based on area of interest,
+ * observation times, and a given bounds and zoom level.
  *
  * @author David Barts <n5jrn@me.com>
  */
@@ -97,62 +97,51 @@ public class GetMap extends HttpServlet {
             }
         }
 
-        /* get optional output size */
-        String rawSize = req.getParameter("size");
-        int maxSize = PIXELS;
-        if (rawSize != null) {
-            boolean bad = false;
-            try {
-                maxSize = Integer.parseInt(rawSize);
-                bad = maxSize < 256 || maxSize > 1024;
-            } catch (NumberFormatException e) {
-                bad = true;
-            }
-            if (bad) {
-                resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Bad request (invalid size)");
-            }
-        }
-
-        /* get the optional bounds */
-        Double north = null, south = null, east = null, west = null;
+        /* get the mandatory bounds and zoom level */
+        Integer north = null, south = null, east = null, west = null, zoom = null;
         try {
-            north = getDouble(req, "north");
-            south = getDouble(req, "south");
-            east = getDouble(req, "east");
-            west = getDouble(req, "west");
+            north = getInteger(req, "north");
+            south = getInteger(req, "south");
+            east = getInteger(req, "east");
+            west = getInteger(req, "west");
+            zoom = getInteger(req, "zoom");
         } catch (NumberFormatException e) {
-            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Bad request (invalid floating-point number)");
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Bad request (invalid integer)");
             return;
         }
-        boolean hasBounds = false;
+        if (north == null || south == null || east == null || west == null || zoom == null) {
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Bad request (bounds or zoom not specified)");
+            return;
+        }
+
+        /* get bounds and zoom limits from session (also mandatory) */
         HttpSession sess = req.getSession();
-        if (north != null && south != null && east != null && west != null) {
-            Double northLimit = (Double) sess.getAttribute("north");
-            Double southLimit = (Double) sess.getAttribute("south");
-            Double eastLimit = (Double) sess.getAttribute("east");
-            Double westLimit = (Double) sess.getAttribute("west");
-            if (northLimit == null || southLimit == null || eastLimit == null || westLimit == null) {
-                resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Forbidden (no valid active session)");
-                return;
-            }
-            /* if any bounds are out of bounds, we draw the original map */
-            boolean outOfBounds = LatLong.northOf(north, northLimit) ||
-                LatLong.southOf(north, southLimit) ||
-                LatLong.northOf(south, northLimit) ||
-                LatLong.southOf(south, southLimit) ||
-                LatLong.eastOf(east, eastLimit) ||
-                LatLong.westOf(east, westLimit) ||
-                LatLong.eastOf(west, eastLimit) ||
-                LatLong.westOf(west, westLimit);
-            if (outOfBounds) {
-                north = northLimit;
-                south = southLimit;
-                east = eastLimit;
-                west = westLimit;
-            }
-            hasBounds = true;
-        } else if (north != null || south != null || east != null || west != null) {
-            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Bad request (incomplete bounds specified)");
+        Integer northLimit = (Integer) sess.getAttribute("north");
+        Integer southLimit = (Integer) sess.getAttribute("south");
+        Integer eastLimit = (Integer) sess.getAttribute("east");
+        Integer westLimit = (Integer) sess.getAttribute("west");
+        Integer zoomLimit = (Integer) sess.getAttribute("zoom");
+        if (northLimit == null || southLimit == null || eastLimit == null || westLimit == null || zoomLimit == null) {
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Bad request (incomplete session)");
+            return;
+        }
+
+        /* reject requests with invalid bounds or zoom */
+        boolean invalidBounds =
+            northOf(toZoom(north, zoom, zoomLimit), northLimit) ||
+            southOf(toZoom(south, zoom, zoomLimit), southLimit) ||
+            eastOf(toZoom(east, zoom, zoomLimit), eastLimit, zoomLimit) ||
+            westOf(toZoom(west, zoom, zoomLimit), westLimit, zoomLimit);
+        boolean invalidZoom = zoom < zoomLimit || zoom > MAXZOOM;
+        if (invalidBounds || invalidZoom) {
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Bad request (invalid bounds or zoom)");
+            return;
+        }
+
+        /* reject requests for overly large maps */
+        if (south - north > PIXELS || eastFrom(west, east, zoom) > PIXELS) {
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Bad request (map too large)");
+            return;
         }
 
         /* get the data to plot */
@@ -170,50 +159,6 @@ public class GetMap extends HttpServlet {
             return;
         }
 
-        /* set bounds, if needed */
-        if (!hasBounds) {
-            /* we start with bounds of 7'30" from the terminal in each direction */
-            double termLat = 0.0, termLong = 0.0;
-            try (PreparedStatement stmt = conn.prepareStatement("select latitude, longitude from areas where id = ?")) {
-                stmt.setInt(1, areaId);
-                ResultSet rs = stmt.executeQuery();
-                if (!rs.next()) {
-                    LOGGER.log(Level.SEVERE, String.format("Area ID %s unknown", areaId));
-                    resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Internal server error (area ID unknown)");
-                    return;
-                }
-                termLat = rs.getDouble(1);
-                termLong = rs.getDouble(2);
-            } catch (SQLException e) {
-                LOGGER.log(Level.SEVERE, "Unable to get terminal location", e);
-                resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Internal server error (unable to get terminal location)");
-                return;
-            }
-            north = termLat + 0.125;
-            south = termLat - 0.125;
-            east = LatLong.normalizeLong(termLong + 0.125);
-            west = LatLong.normalizeLong(termLong - 0.125);
-
-            /* then we expand them to include observations */
-            for (AcarsObservation o : obs) {
-                if (LatLong.northOf(o.getLatitude(), north))
-                    north = o.getLatitude();
-                if (LatLong.southOf(o.getLatitude(), south))
-                    south = o.getLatitude();
-                if (LatLong.eastOf(o.getLongitude(), east))
-                    east = o.getLongitude();
-                if (LatLong.westOf(o.getLongitude(), west))
-                    west = o.getLongitude();
-            }
-
-            /* add a tad more so no observation is ever right on the edge */
-            double margin = 0.05 * Math.max(north-south, LatLong.eastFrom(west, east));
-            north += margin;
-            south -= margin;
-            east = LatLong.normalizeLong(east + margin);
-            west = LatLong.normalizeLong(west - margin);
-        }
-
         /* get cache directory and a provider */
         String cachePath = getServletContext().getInitParameter("cache");
         if (cachePath == null) {
@@ -225,9 +170,7 @@ public class GetMap extends HttpServlet {
             new CachingTileProvider(new File(cachePath), new OsmTileProvider()));
 
         /* OK, finally ready to generate a map */
-        double[] bounds = new double[] { south, west, north, east };
-        int[] size = new int[] { maxSize, maxSize };
-        Map m = Map.withSize(bounds, size, p);
+        Map m = new Map(south, west, north, east, zoom, p);
         BufferedImage image = null;
         try {
             image = m.getImage();
@@ -252,15 +195,6 @@ public class GetMap extends HttpServlet {
                     continue;
                 g.setColor(getColor(o.getAltitude()));
                 g.fillOval(x, y, DIAMETER, DIAMETER);
-            }
-
-            /* make note of the map extents if this is the first time we've
-               made a map this session */
-            if (!hasBounds) {
-                sess.setAttribute("north", north);
-                sess.setAttribute("south", south);
-                sess.setAttribute("east", east);
-                sess.setAttribute("west", west);
             }
 
             /* now return it */
@@ -301,12 +235,12 @@ public class GetMap extends HttpServlet {
         }
     }
 
-    private Double getDouble(HttpServletRequest req, String name)
+    private Integer getInteger(HttpServletRequest req, String name)
     {
         String raw = req.getParameter(name);
         if (raw == null)
             return null;
-        return new Double(raw);
+        return new Integer(raw);
     }
 
     private Long getLong(HttpServletRequest req, String name)
