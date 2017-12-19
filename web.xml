@@ -29,7 +29,7 @@
     <description>
       This is the user interface for the Weather Aloft project.
     </description>
- 
+
     <!-- Context initialization parameters that define shared
          String constants used within your application, which
          can be customized by the system administrator who is
@@ -60,6 +60,54 @@
       <param-name>cache</param-name>
       <param-value>/Users/davidb/temp/cache</param-value>
       <description>Map tiles cache.</description>
+    </context-param>
+
+    <!-- Parameters for SMTP client (ContactBean.java) -->
+    <context-param>
+      <param-name>mail.smtps.host</param-name>
+      <param-value>cpshared02-chi.ubiquityclients.com</param-value>
+    </context-param>
+    <context-param>
+      <param-name>mail.smtp.socketFactory.class</param-name>
+      <param-value>javax.net.ssl.SSLSocketFactory</param-value>
+    </context-param>
+    <context-param>
+      <param-name>mail.smtp.socketFactory.fallback</param-name>
+      <param-value>false</param-value>
+    </context-param>
+    <context-param>
+      <param-name>mail.smtp.port</param-name>
+      <param-value>465</param-value>
+    </context-param>
+    <context-param>
+      <param-name>mail.smtp.socketFactory.port</param-name>
+      <param-value>465</param-value>
+    </context-param>
+    <context-param>
+      <param-name>mail.smtps.auth</param-name>
+      <param-value>mail.smtps.auth</param-value>
+    </context-param>
+    <context-param>
+      <param-name>mail.smtp.username</param-name>
+      <param-value>INSERT USERNAME HERE</param-value>
+    </context-param>
+    <context-param>
+      <param-name>mail.smtp.password</param-name>
+      <param-value>INSERT PASSWORD HERE</param-value>
+    </context-param>
+    <context-param>
+      <param-name>mail.smtp.recipient</param-name>
+      <param-value>INSERT RECIPIENT HERE</param-value>
+    </context-param>
+
+    <!-- reCaptcha parameters (ContactBean.java) -->
+    <context-param>
+      <param-name>recaptcha.key.site</param-name>
+      <param-value>INSERT SITE KEY HERE</param-value>
+    </context-param>
+     <context-param>
+      <param-name>recaptcha.key.secret</param-name>
+      <param-value>INSERT SECRET HERE</param-value>
     </context-param>
 
     <resource-ref>
@@ -134,5 +182,5 @@
     <session-config>
       <session-timeout>30</session-timeout>    <!-- 30 minutes -->
     </session-config>
-    
+
 </web-app>
