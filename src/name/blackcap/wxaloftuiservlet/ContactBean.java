@@ -114,13 +114,20 @@ public class ContactBean
             return false;
         }
 
+        /* Get subject */
+        String subject = req.getParameter("subject");
+        if (subject == null || subject.isEmpty())
+            subject = "KOOSAH: (no subject)";
+        else
+            subject = "KOOSAH: " + subject;
+
         /* send the message */
         try {
             Session session = Session.getInstance(props, null);
             MimeMessage msg = new MimeMessage(session);
             msg.setFrom(new InternetAddress(sender));
             msg.setRecipients(Message.RecipientType.TO, InternetAddress.parse(recipient, false));
-            msg.setSubject(req.getParameter("subject"));
+            msg.setSubject(subject);
             msg.setText(message, "utf-8");
             msg.setSentDate(new Date());
             try (SMTPTransport t = (SMTPTransport)session.getTransport("smtps")) {
