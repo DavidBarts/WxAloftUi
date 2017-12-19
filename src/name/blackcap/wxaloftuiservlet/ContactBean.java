@@ -123,7 +123,7 @@ public class ContactBean
 
         /* Annotate body */
         message = "This message is from " + req.getParameter("address") +
-            System.lineSeparator() + System.lineSeparator() + message;
+            " :" + System.lineSeparator() + System.lineSeparator() + message;
 
         /* send the message */
         try {
