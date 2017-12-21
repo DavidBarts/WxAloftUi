@@ -74,8 +74,8 @@
           <table style="width: 100%">
             <tr>
               <td class="thirds left">
-                <!-- FIXME: these c:if blocks should probably be a custom
-                     tag, since the pattern is used so much in this page. -->
+                <%-- FIXME: these <c:if> blocks should probably be a custom
+                     tag, since the pattern is used so much in this page. --%>
                 <c:if test="${not empty obs.zoomOut}">
                   <a class="nav" href="${fn:escapeXml(obs.zoomOut)}">-</a>
                 </c:if>
