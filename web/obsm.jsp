@@ -65,7 +65,7 @@
       </p>
     </c:if>
 
-    <p><a href="obsm.jsp?area=${obs.shortArea}">Reset the map.</a></p>
+    <p><a href="obsm.jsp?area=${obs.shortArea}">Click here to reset.</a></p>
 
     <table style="margin-left: auto; margin-right: auto">
       <tr>
@@ -74,7 +74,7 @@
           <table style="width: 100%">
             <tr>
               <td class="thirds left">
-                <!-- FIXME: these <c:if> blocks should probably be a custom
+                <!-- FIXME: these c:if blocks should probably be a custom
                      tag, since the pattern is used so much in this page. -->
                 <c:if test="${not empty obs.zoomOut}">
                   <a class="nav" href="${fn:escapeXml(obs.zoomOut)}">-</a>
