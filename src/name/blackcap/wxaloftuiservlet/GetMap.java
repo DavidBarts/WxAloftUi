@@ -188,10 +188,10 @@ public class GetMap extends HttpServlet {
             final int OFFSET = RADIUS;
             for (AcarsObservation o : obs) {
                 int x = m.longToPixel(o.getLongitude()) - OFFSET;
-                if (badX(image, x) || badX(image, x + DIAMETER))
+                if (badX(image, x - 1) || badX(image, x + DIAMETER + 1))
                     continue;
                 int y = m.latToPixel(o.getLatitude()) - OFFSET;
-                if (badY(image, y) || badY(image, y + DIAMETER))
+                if (badY(image, y - 1) || badY(image, y + DIAMETER + 1))
                     continue;
                 g.setColor(getColor(o.getAltitude()));
                 g.fillOval(x, y, DIAMETER, DIAMETER);
