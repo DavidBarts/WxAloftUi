@@ -195,6 +195,8 @@ public class GetMap extends HttpServlet {
                     continue;
                 g.setColor(getColor(o.getAltitude()));
                 g.fillOval(x, y, DIAMETER, DIAMETER);
+                g.setColor(Color.BLACK);
+                g.drawOval(x, y, DIAMETER, DIAMETER);
             }
 
             /* now return it */
