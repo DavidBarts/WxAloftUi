@@ -43,26 +43,24 @@
     initially, the only thing you can do is zoom in.)</p>
 
     <c:if test="${(empty param['zoom']) or (sessionScope['zoom'] eq param['zoom'])}">
-      <p>
-        <form action="obsm.jsp" method="GET">
-          <input type="hidden" name="area" value="${obs.shortArea}"/>
-          Show observations taken in the last:
-          <select name="since">
-            <c:forTokens items="PT1H,1 hour;PT1H30M,1.5 hours;PT2H,2 hours;PT2H30M,2.5 hours;PT3H,3 hours;PT3H30M,3.5 hours;PT4H,4 hours;PT4H30M,4.5 hours;PT5H,5 hours;PT5H30M,5.5 hours;PT6H,6 hours" delims=";" var="i">
-              <c:set var="d" value="${fn:split(i, ',')}"/>
-              <c:choose>
-                <c:when test="${obs.rawDuration eq d[0]}">
-                  <option value="${d[0]}" selected><c:out value="${d[1]}"/></option>
-                </c:when>
-                <c:otherwise>
-                  <option value="${d[0]}"><c:out value="${d[1]}"/></option>
-                </c:otherwise>
-              </c:choose>
-            </c:forTokens>
-          </select>
-          <input type="submit" value="Go"/>
-        </form>
-      </p>
+      <form action="obsm.jsp" method="GET">
+        <input type="hidden" name="area" value="${obs.shortArea}"/>
+        Show observations taken in the last:
+        <select name="since">
+          <c:forTokens items="PT1H,1 hour;PT1H30M,1.5 hours;PT2H,2 hours;PT2H30M,2.5 hours;PT3H,3 hours;PT3H30M,3.5 hours;PT4H,4 hours;PT4H30M,4.5 hours;PT5H,5 hours;PT5H30M,5.5 hours;PT6H,6 hours" delims=";" var="i">
+            <c:set var="d" value="${fn:split(i, ',')}"/>
+            <c:choose>
+              <c:when test="${obs.rawDuration eq d[0]}">
+                <option value="${d[0]}" selected><c:out value="${d[1]}"/></option>
+              </c:when>
+              <c:otherwise>
+                <option value="${d[0]}"><c:out value="${d[1]}"/></option>
+              </c:otherwise>
+            </c:choose>
+          </c:forTokens>
+        </select>
+        <input type="submit" value="Go"/>
+      </form>
     </c:if>
 
     <p><a href="obsm.jsp?area=${obs.shortArea}">Click here to reset.</a></p>
