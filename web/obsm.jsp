@@ -77,7 +77,7 @@
                 <%-- FIXME: these <c:if> blocks should probably be a custom
                      tag, since the pattern is used so much in this page. --%>
                 <c:if test="${not empty obs.zoomOut}">
-                  <a class="nav" href="${fn:escapeXml(obs.zoomOut)}">-</a>
+                  <a class="nav" href="${fn:escapeXml(obs.zoomOut)}">&#8722;</a>
                 </c:if>
               </td><td class="thirds center">
                 <c:if test="${not empty obs.panNorth}">
