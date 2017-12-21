@@ -39,7 +39,7 @@
     <p>This map can be zoomed and panned. Zoom in by clicking on the plus sign
     in the upper-right corner, zoom out by clicking on the minus sign in the
     upper-left corner, and pan by clicking on the arrow on the appropriate edge.
-    (If you're at a limit, one or more of these operations will be disallowed;
+    (If you are at a limit, one or more of these operations will be disallowed;
     initially, the only thing you can do is zoom in.)</p>
 
     <c:if test="${(empty param['zoom']) or (sessionScope['zoom'] eq param['zoom'])}">
