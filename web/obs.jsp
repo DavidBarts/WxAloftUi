@@ -36,6 +36,8 @@
       <jsp:param name="area" value="${obs.shortArea}"/>
     </jsp:include>
 
+    <p><a href="/">Return to main page.</a></p>
+
     <div id="map" />
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js" type="text/javascript"></script>
     <script src="https://rawgithub.com/stamen/modestmaps-js/master/modestmaps.min.js" type="text/javascript"></script>

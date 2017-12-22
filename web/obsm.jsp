@@ -50,7 +50,8 @@
      </jsp:include>
     </c:if>
 
-    <p><a href="obsm.jsp?area=${obs.shortArea}">Click here to reset.</a></p>
+    <p><a href="obsm.jsp?area=${obs.shortArea}">Reset this map.</a>
+    <a href="/">Return to main page.</a></p>
 
     <table style="margin-left: auto; margin-right: auto">
       <tr>
