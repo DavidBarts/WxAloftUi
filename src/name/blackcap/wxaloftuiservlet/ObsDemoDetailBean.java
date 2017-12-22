@@ -23,7 +23,7 @@ import javax.sql.DataSource;
  */
 public class ObsDemoDetailBean
 {
-    private static final Logger LOGGER = Logger.getLogger(ObsDemoBean.class.getCanonicalName());
+    private static final Logger LOGGER = Logger.getLogger(ObsDemoDetailBean.class.getCanonicalName());
     private static final SimpleDateFormat LOCAL_TIME = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
     private static final SimpleDateFormat UTC_TIME = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
     static {

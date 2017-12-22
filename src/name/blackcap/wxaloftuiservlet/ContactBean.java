@@ -33,7 +33,7 @@ import javax.servlet.http.HttpSession;
  */
 public class ContactBean
 {
-    private static final Logger LOGGER = Logger.getLogger(ObsDemoBean.class.getCanonicalName());
+    private static final Logger LOGGER = Logger.getLogger(ContactBean.class.getCanonicalName());
     private static final Pattern VALID_EMAIL = Pattern.compile("\\S+@\\S+\\.\\S+");
     private static final Charset UTF8 = Charset.forName("UTF-8");
 
