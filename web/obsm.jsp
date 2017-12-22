@@ -11,6 +11,7 @@
 <html>
   <head>
     <title>Aircraft Weather Observations</title>
+    <meta name="robots" content="nofollow"/>
     <style type="text/css">
       table, th, td { border: none }
       .left { text-align: left }
