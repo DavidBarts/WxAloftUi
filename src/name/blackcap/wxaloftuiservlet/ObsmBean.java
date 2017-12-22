@@ -30,15 +30,13 @@ import static name.blackcap.wxaloftuiservlet.WorldPixel.*;
  */
 public class ObsmBean
 {
-    private static final Logger LOGGER = Logger.getLogger(ObsDemoBean.class.getCanonicalName());
+    private static final Logger LOGGER = Logger.getLogger(ObsmBean.class.getCanonicalName());
     private static final SimpleDateFormat LOCAL_TIME = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
-    private static final SimpleDateFormat UTC_TIME = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
-    static {
-        UTC_TIME.setTimeZone(TimeZone.getTimeZone("GMT"));
-    }
 
+    /* maybe put these in a common file? or do we want separate defaults? */
     private static final String DEFAULT_DURATION = "PT2H";
     private static final long MAX_DURATION = 6L * 60L * 60L * 1000L;
+
     private int areaId;
     private Integer north, south, east, west, zoom;
     private ArrayList<Observation> observations;
@@ -76,7 +74,7 @@ public class ObsmBean
         }
         long millis = d.getSeconds() * 1000L + d.getNano() / 1000000;
         if (millis > MAX_DURATION) {
-            LOGGER.log(Level.INFO, "Duration too long!");
+            LOGGER.log(Level.SEVERE, "Duration too long!");
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Bad request (excessive duration)");
             return false;
         }
@@ -182,7 +180,7 @@ public class ObsmBean
             shortArea = rs.getString(1);
             longArea = String.format("%s, %s, %s", rs.getString(2), rs.getString(3), rs.getString(4));
             dFormat.setTimeZone(TimeZone.getTimeZone(rs.getString(5)));
-            sinceString = dFormat.format(new Date(since));
+            sinceString = dFormat.format(new java.util.Date(since));
             termLat = rs.getDouble(6);
             termLong = rs.getDouble(7);
         } catch (SQLException e) {
