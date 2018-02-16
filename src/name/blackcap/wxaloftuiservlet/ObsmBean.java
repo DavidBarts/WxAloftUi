@@ -120,14 +120,6 @@ public class ObsmBean
             hasBounds = true;
         }
 
-        /* debug */
-        if (hasBounds)
-            LOGGER.log(Level.INFO,
-                String.format("north=%d, south=%d, east=%d, west=%d, zoom=%d",
-                    north, south, east, west, zoom));
-        else
-            LOGGER.log(Level.INFO, "no bounds supplied");
-
         /* everythiong else requires a database connection, so... */
         try (Connection conn = getConnection()) {
             return processWithConnection(req, resp, conn);
