@@ -256,6 +256,11 @@ public class ObstBean
         return longArea;
     }
 
+    public String getRawDuration()
+    {
+        return rawDuration;
+    }
+
     public String getSince()
     {
         return sinceString;

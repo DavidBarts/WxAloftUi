@@ -51,7 +51,7 @@
         <tr>
           <td><c:out value="${row['observed']}"/></td>
           <td><c:out value="${row['received']}"/></td>
-          <td><c:out value="${row['altitude'}"/></td>
+          <td><c:out value="${row['altitude']}"/></td>
           <td><c:out value="${row['latitude']}"/></td>
           <td><c:out value="${row['longitude']}"/></td>
           <td><c:out value="${row['temperature']}"/></td>

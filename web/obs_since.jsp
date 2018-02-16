@@ -4,7 +4,7 @@
 
 <form action="${param['action']}" method="GET">
   <c:if test="${not empty param['order']}">
-    <input type="hidden" name="area" value="${param['order']}"/>
+    <input type="hidden" name="order" value="${param['order']}"/>
   </c:if>
   <input type="hidden" name="area" value="${param['area']}"/>
   Show observations taken in the last:
