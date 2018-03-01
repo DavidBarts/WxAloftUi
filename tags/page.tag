@@ -14,7 +14,7 @@
     <c:otherwise><body onload="${pageScope.onload}"></c:otherwise>
   </c:choose>
     <div style="overflow-x: hidden">
-      <img style="left: 50%" src="header_wide.png" alt="Koosah.INFO"/>
+      <img style="left: 50%" src="/header_wide.png" alt="Koosah.INFO"/>
     </div>
     <jsp:doBody/>
   </body>
