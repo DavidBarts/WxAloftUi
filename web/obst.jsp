@@ -11,7 +11,8 @@
 %>
 <webapp:page>
   <jsp:attribute name="head">
-    <title>Aircraft Weather Observations</title>
+    <meta charset="utf-8" />
+    <title>Koosah.INFO: Aircraft Weather Observations</title>
     <style type="text/css">
       table, th, td { border: solid black 1px }
     </style>
