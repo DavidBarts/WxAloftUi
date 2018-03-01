@@ -15,7 +15,7 @@
     <c:otherwise><body onload="${fn:escapeXml(pageScope.onload)}"></c:otherwise>
   </c:choose>
     <div style="overflow-x: hidden">
-      <img style="left: 50%" src="header_wide.png" alt="Koosah.INFO"/>
+      <a href="/"><img style="left: 50%" src="header_wide.png" alt="Koosah.INFO"/></a>
     </div>
     <jsp:doBody/>
   </body>
