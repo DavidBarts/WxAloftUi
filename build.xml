@@ -21,6 +21,7 @@
   <property name="app.name"      value="${ant.project.name}"/>
   <property name="work.home"     value="${basedir}/work"/>
   <property name="lib.home"      value="${basedir}/lib"/>
+  <property name="tags.home"      value="${basedir}/tags"/>
   <property name="junit.lib.home"      value="${basedir}/junit-lib"/>
   <property name="src.home"      value="${basedir}/src"/>
   <property name="web.home"      value="${basedir}/web"/>
@@ -89,6 +90,7 @@
     <mkdir dir="${dist.home}/META-INF"/>
     <mkdir dir="${dist.home}/WEB-INF/classes"/>
     <mkdir dir="${dist.home}/WEB-INF/lib"/>
+    <mkdir dir="${dist.home}/WEB-INF/tags"/>
     <mkdir dir="${reports.home}"/>
     <mkdir dir="${work.home}/WEB-INF/classes"/>
     <copy todir="${work.home}" preservelastmodified="true">
@@ -119,6 +121,9 @@
       <fileset dir="${lib.home}">
         <include name="*.jar"/>
       </fileset>
+    </copy>
+    <copy todir="${dist.home}/WEB-INF/tags" preservelastmodified="true">
+      <fileset dir="${tags.home}"/>
     </copy>
     <copy file="${basedir}/web.xml" todir="${dist.home}/WEB-INF"
           preservelastmodified="true"/>

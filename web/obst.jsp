@@ -1,6 +1,7 @@
 <%@ page contentType="text/html; charset=UTF-8"  %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+<%@ taglib prefix="webapp" tagdir="/WEB-INF/tags" %>
 <%@ page language="java" import="name.blackcap.wxaloftuiservlet.ObstBean" %>
 <jsp:useBean id="obs"
   scope="page" class="name.blackcap.wxaloftuiservlet.ObstBean" />
@@ -8,15 +9,15 @@
   if (!obs.processRequest(request, response))
     return;
 %>
-<html>
-  <head>
+<webapp:page>
+  <jsp:attribute name="head">
     <title>Aircraft Weather Observations</title>
     <style type="text/css">
       table, th, td { border: solid black 1px }
     </style>
-  </head>
+  </jsp:attribute>
 
-  <body>
+  <jsp:body>
     <h1><c:out value="${obs.shortArea}"/> Weather Observatons</h1>
     <p>This table shows observations taken by aircraft in the
     <c:out value="${obs.longArea}"/> area since
@@ -62,5 +63,5 @@
         </tr>
       </c:forEach>
     </table>
-  </body>
-</html>
+  </jsp:body>
+</webapp:page>

@@ -1,6 +1,7 @@
 <%@ page contentType="text/html; charset=UTF-8"  %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+<%@ taglib prefix="webapp" tagdir="/WEB-INF/tags" %>
 <%@ page language="java" import="name.blackcap.wxaloftuiservlet.ObsDemoBean" %>
 <jsp:useBean id="contact"
   scope="page" class="name.blackcap.wxaloftuiservlet.ContactBean" />
@@ -8,16 +9,17 @@
   if (!contact.processRequest(request, response, application))
     return;
 %>
-<html>
-  <head>
+<webapp:page>
+  <jsp:attribute name="head">
+    <meta charset="utf-8" />
     <title>Koosah.INFO: Contact</title>
     <style type="text/css">
       .error { color: red }
     </style>
     <script src="https://www.google.com/recaptcha/api.js"></script>
-  </head>
+  </jsp:attribute>
 
-  <body>
+  <jsp:body>
     <h1>Enter your message below</h1>
     <form action="contact.jsp" method="POST">
       <p>
@@ -56,5 +58,5 @@
     <c:if test="${not empty contact.forward}">
       <jsp:forward page="${contact.forward}"/>
     </c:if>
-  </body>
-</html>
+  </jsp:body>
+</webapp:page>

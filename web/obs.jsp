@@ -1,6 +1,7 @@
 <%@ page contentType="text/html; charset=UTF-8"  %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+<%@ taglib prefix="webapp" tagdir="/WEB-INF/tags" %>
 <%@ page language="java" import="name.blackcap.wxaloftuiservlet.ObsBean" %>
 <jsp:useBean id="obs"
   scope="page" class="name.blackcap.wxaloftuiservlet.ObsBean" />
@@ -8,9 +9,10 @@
   if (!obs.processRequest(request, response))
     return;
 %>
-<html>
-  <head>
-    <title>Aircraft Weather Observations</title>
+<webapp:page onload="initMap(${obs.areaId}, &quot;${obs.duration}&quot;)">
+  <jsp:attribute name="head">
+    <meta charset="utf-8" />
+    <title>Koosah.INFO: Aircraft Weather Observations</title>
     <meta name="robots" content="nofollow"/>
     <style type="text/css">
       #map {
@@ -21,9 +23,9 @@
         border: 1px solid black
       }
     </style>
-  </head>
+  </jsp:attribute>
 
-  <body onload="initMap(${obs.areaId}, &quot;${obs.duration}&quot;)">
+  <jsp:body>
     <h1><c:out value="${obs.shortArea}"/> Weather Observatons</h1>
     <p>This map shows observations taken by aircraft in the
     <c:out value="${obs.longArea}"/> area since
@@ -43,5 +45,5 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js" type="text/javascript"></script>
     <script src="https://rawgithub.com/stamen/modestmaps-js/master/modestmaps.min.js" type="text/javascript"></script>
     <script src="obs.js" type="text/javascript"></script>
-  </body>
-</html>
+  </jsp:body>
+</webapp:page>

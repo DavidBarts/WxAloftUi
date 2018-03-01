@@ -1,6 +1,7 @@
 <%@ page contentType="text/html; charset=UTF-8"  %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+<%@ taglib prefix="webapp" tagdir="/WEB-INF/tags" %>
 <%@ page language="java" import="name.blackcap.wxaloftuiservlet.ObsmBean" %>
 <jsp:useBean id="obs"
   scope="page" class="name.blackcap.wxaloftuiservlet.ObsmBean" />
@@ -8,8 +9,8 @@
   if (!obs.processRequest(request, response))
     return;
 %>
-<html>
-  <head>
+<webapp:page>
+  <jsp:attribute name="head">
     <title>Aircraft Weather Observations</title>
     <meta name="robots" content="nofollow"/>
     <style type="text/css">
@@ -27,9 +28,9 @@
         border: 1px solid black
       }
     </style>
-  </head>
+  </jsp:attribute>
 
-  <body>
+  <jsp:body>
     <h1><c:out value="${obs.shortArea}"/> Weather Observatons</h1>
     <p>This map shows observations taken by aircraft in the
     <c:out value="${obs.longArea}"/> area since
@@ -112,5 +113,5 @@
         <td></td>
       </tr>
     </table>
-  </body>
-</html>
+  </jsp:body>
+</webapp:page>
