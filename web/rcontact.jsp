@@ -1,9 +1,9 @@
 <%@ page contentType="text/html; charset=UTF-8"  %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
-<%@ page language="java" import="name.blackcap.wxaloftuiservlet.ContactBean" %>
+<%@ page language="java" import="name.blackcap.wxaloftuiservlet.RContactBean" %>
 <jsp:useBean id="contact"
-  scope="page" class="name.blackcap.wxaloftuiservlet.ContactBean" />
+  scope="page" class="name.blackcap.wxaloftuiservlet.RContactBean" />
 <%
   if (!contact.processRequest(request, response, application, "RÉSUMÉ"))
     return;

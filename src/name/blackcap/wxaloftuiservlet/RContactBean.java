@@ -31,7 +31,7 @@ import javax.servlet.http.HttpSession;
  *
  * @author David Barts <n5jrn@me.com>
  */
-public class ContactBean
+public class RContactBean
 {
     private static final Logger LOGGER = Logger.getLogger(ContactBean.class.getCanonicalName());
     private static final Pattern VALID_EMAIL = Pattern.compile("\\S+@\\S+\\.\\S+");
@@ -41,7 +41,7 @@ public class ContactBean
     private boolean missingMessage, badCaptcha;
     private String forward;
 
-    public ContactBean()
+    public RContactBean()
     {
         badAddress = missingAddress = missingMessage = badCaptcha = false;
         forward = "";
@@ -117,9 +117,9 @@ public class ContactBean
         /* Get subject */
         String subject = req.getParameter("subject");
         if (subject == null || subject.isEmpty())
-            subject = "KOOSAH: (no subject)";
+            subject = "RÉSUMÉ: (no subject)";
         else
-            subject = "KOOSAH: " + subject;
+            subject = "RÉSUMÉ: " + subject;
 
         /* Annotate body */
         message = "This message is from " + address + " :" +
@@ -139,9 +139,9 @@ public class ContactBean
                 t.sendMessage(msg, msg.getAllRecipients());
             }
         } catch (MessagingException e) {
-            forward = "sent.jsp?error=" + e.getMessage();
+            forward = "rsent.jsp?error=" + e.getMessage();
         }
-        forward = "sent.jsp";
+        forward = "rsent.jsp";
 
         return true;
     }

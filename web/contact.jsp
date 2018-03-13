@@ -6,7 +6,7 @@
 <jsp:useBean id="contact"
   scope="page" class="name.blackcap.wxaloftuiservlet.ContactBean" />
 <%
-  if (!contact.processRequest(request, response, application, "KOOSAH"))
+  if (!contact.processRequest(request, response, application))
     return;
 %>
 <webapp:page>
