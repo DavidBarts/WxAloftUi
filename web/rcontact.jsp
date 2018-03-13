@@ -19,7 +19,7 @@
 
   <body>
     <h1>Enter your message below</h1>
-    <form action="contact.jsp" method="POST">
+    <form action="rcontact.jsp" method="POST">
       <p>
         Your e-mail address (required):<br/>
         <input type="text" name="address" size="80" maxlength="255"
