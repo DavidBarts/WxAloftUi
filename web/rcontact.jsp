@@ -5,7 +5,7 @@
 <jsp:useBean id="contact"
   scope="page" class="name.blackcap.wxaloftuiservlet.RContactBean" />
 <%
-  if (!contact.processRequest(request, response, application, "RÉSUMÉ"))
+  if (!contact.processRequest(request, response, application))
     return;
 %>
 <html>
