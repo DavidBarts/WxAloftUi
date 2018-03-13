@@ -1,25 +1,23 @@
 <%@ page contentType="text/html; charset=UTF-8"  %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
-<%@ taglib prefix="webapp" tagdir="/WEB-INF/tags" %>
 <%@ page language="java" import="name.blackcap.wxaloftuiservlet.ContactBean" %>
 <jsp:useBean id="contact"
   scope="page" class="name.blackcap.wxaloftuiservlet.ContactBean" />
 <%
-  if (!contact.processRequest(request, response, application, "KOOSAH"))
+  if (!contact.processRequest(request, response, application, "RÉSUMÉ"))
     return;
 %>
-<webapp:page>
-  <jsp:attribute name="head">
-    <meta charset="utf-8" />
-    <title>Koosah.INFO: Contact</title>
+<html>
+  <head>
+    <title>David W. Barts: Contact</title>
     <style type="text/css">
       .error { color: red }
     </style>
     <script src="https://www.google.com/recaptcha/api.js"></script>
-  </jsp:attribute>
+  </head>
 
-  <jsp:body>
+  <body>
     <h1>Enter your message below</h1>
     <form action="contact.jsp" method="POST">
       <p>
@@ -58,5 +56,5 @@
     <c:if test="${not empty contact.forward}">
       <jsp:forward page="${contact.forward}"/>
     </c:if>
-  </jsp:body>
-</webapp:page>
+  </body>
+</html>

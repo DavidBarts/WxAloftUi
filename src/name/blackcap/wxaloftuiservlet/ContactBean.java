@@ -47,7 +47,7 @@ public class ContactBean
         forward = "";
     }
 
-    public boolean processRequest(HttpServletRequest req, HttpServletResponse resp, ServletContext app) throws ServletException, IOException
+    public boolean processRequest(HttpServletRequest req, HttpServletResponse resp, ServletContext app, String subjPref) throws ServletException, IOException
     {
         /* if this is a non-POST request, it means we're displaying the
            form, not acting on any form data, in which case this bean is
@@ -117,9 +117,9 @@ public class ContactBean
         /* Get subject */
         String subject = req.getParameter("subject");
         if (subject == null || subject.isEmpty())
-            subject = "KOOSAH: (no subject)";
+            subject = subjPref + ": (no subject)";
         else
-            subject = "KOOSAH: " + subject;
+            subject = subjPref + ": " + subject;
 
         /* Annotate body */
         message = "This message is from " + address + " :" +
