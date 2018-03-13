@@ -26,6 +26,13 @@
         <p><c:out value="${param['error']}"/></p>
       </c:otherwise>
     </c:choose>
-    <p><a href="/index.html">Back to home page.</a></p>
+    <p><c:choose>
+      <c:when test="${empty param['page']}">
+        <a href="/">Back to home page.</a>
+      </c:when>
+      <c:otherwise>
+        <a href="/${param['page']}">Go back.</a>
+      </c:otherwise>
+    </c:choose></p>
   </body>
 </html>
