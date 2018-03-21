@@ -1,4 +1,4 @@
-package name.blackcap.wxaloftuiservlet;
+package info.koosah.wxaloftuiservlet;
 
 /**
  * @author David Barts <n5jrn@me.com>

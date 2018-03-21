@@ -1,4 +1,4 @@
-package name.blackcap.wxaloftuiservlet;
+package info.koosah.wxaloftuiservlet;
 
 import java.io.*;
 import java.sql.*;
@@ -20,7 +20,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
-import static name.blackcap.wxaloftuiservlet.WorldPixel.*;
+import static info.koosah.wxaloftuiservlet.WorldPixel.*;
 
 /**
  * Backs the obsm.jsp (mobile-friendly observations) page.

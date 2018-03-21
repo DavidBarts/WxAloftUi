@@ -2,9 +2,9 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <%@ taglib prefix="webapp" tagdir="/WEB-INF/tags" %>
-<%@ page language="java" import="name.blackcap.wxaloftuiservlet.ContactBean" %>
+<%@ page language="java" import="info.koosah.wxaloftuiservlet.ContactBean" %>
 <jsp:useBean id="contact"
-  scope="page" class="name.blackcap.wxaloftuiservlet.ContactBean" />
+  scope="page" class="info.koosah.wxaloftuiservlet.ContactBean" />
 <%
   if (!contact.processRequest(request, response, application))
     return;

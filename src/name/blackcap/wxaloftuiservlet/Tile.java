@@ -1,12 +1,12 @@
-package name.blackcap.wxaloftuiservlet;
+package info.koosah.wxaloftuiservlet;
 
 import java.awt.Image;
 import java.io.IOException;
 
-import static name.blackcap.wxaloftuiservlet.WorldPixel.*;
+import static info.koosah.wxaloftuiservlet.WorldPixel.*;
 
 /**
- * @author me@blackcap.name
+ * @authoDavid Barts <n5jrn@me.com>
  * @since 2017-11-27
  *
  * A single map tile. Note that tiles are neither square nor uniform! They

@@ -1,4 +1,4 @@
-package name.blackcap.wxaloftuiservlet;
+package info.koosah.wxaloftuiservlet;
 
 import java.awt.Color;
 import java.awt.Graphics;

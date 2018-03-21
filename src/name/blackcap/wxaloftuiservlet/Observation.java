@@ -1,4 +1,4 @@
-package name.blackcap.wxaloftuiservlet;
+package info.koosah.wxaloftuiservlet;
 
 /**
  * Contains the observations in ObsDemoBean (and probably a couple other

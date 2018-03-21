@@ -1,10 +1,10 @@
-package name.blackcap.wxaloftuiservlet;
+package info.koosah.wxaloftuiservlet;
 
 import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 
-import static name.blackcap.wxaloftuiservlet.WorldPixel.*;
+import static info.koosah.wxaloftuiservlet.WorldPixel.*;
 
 /**
  * Tests the WorldPixel module.

@@ -2,9 +2,9 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <%@ taglib prefix="webapp" tagdir="/WEB-INF/tags" %>
-<%@ page language="java" import="name.blackcap.wxaloftuiservlet.ObstBean" %>
+<%@ page language="java" import="info.koosah.wxaloftuiservlet.ObstBean" %>
 <jsp:useBean id="obs"
-  scope="page" class="name.blackcap.wxaloftuiservlet.ObstBean" />
+  scope="page" class="info.koosah.wxaloftuiservlet.ObstBean" />
 <%
   if (!obs.processRequest(request, response))
     return;

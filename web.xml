@@ -147,7 +147,7 @@
       <description>
         Generates maps of observations from OSM tiles.
       </description>
-      <servlet-class>name.blackcap.wxaloftuiservlet.GetMap</servlet-class>
+      <servlet-class>info.koosah.wxaloftuiservlet.GetMap</servlet-class>
       <load-on-startup>1</load-on-startup>
     </servlet>
 

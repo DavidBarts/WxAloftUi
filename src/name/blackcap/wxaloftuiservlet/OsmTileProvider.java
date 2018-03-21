@@ -1,7 +1,7 @@
-package name.blackcap.wxaloftuiservlet;
+package info.koosah.wxaloftuiservlet;
 
 /**
- * @author me@blackcap.name
+ * @author David Barts <n5jrn@me.com>
  * @since 2017-11-27
  *
  * Provider that pesters tile.openstreetmap.org for tiles.

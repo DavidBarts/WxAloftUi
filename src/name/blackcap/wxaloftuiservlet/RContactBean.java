@@ -1,4 +1,4 @@
-package name.blackcap.wxaloftuiservlet;
+package info.koosah.wxaloftuiservlet;
 
 import com.sun.mail.smtp.SMTPTransport;
 import java.io.*;

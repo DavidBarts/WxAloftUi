@@ -1,7 +1,7 @@
-package name.blackcap.wxaloftuiservlet;
+package info.koosah.wxaloftuiservlet;
 
 /**
- * @author me@blackcap.name
+ * @author n5jrn@me.com
  * @since 2017-11-27
  *
  * Static utilities for comparing latitude/longitude (mostly the latter)

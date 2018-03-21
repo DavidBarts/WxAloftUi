@@ -1,4 +1,4 @@
-package name.blackcap.wxaloftuiservlet;
+package info.koosah.wxaloftuiservlet;
 
 import java.awt.Color;
 import java.awt.Graphics;
@@ -22,9 +22,9 @@ import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
-import name.blackcap.acarsutils.AcarsObservation;
+import info.koosah.acarsutils.AcarsObservation;
 
-import static name.blackcap.wxaloftuiservlet.WorldPixel.*;
+import static info.koosah.wxaloftuiservlet.WorldPixel.*;
 
 /**
  * Retrieve a weather observations map, based on area of interest,

@@ -1,4 +1,4 @@
-package name.blackcap.wxaloftuiservlet;
+package info.koosah.wxaloftuiservlet;
 
 import java.io.File;
 import java.io.IOException;
@@ -8,7 +8,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.HashMap;
 
 /**
- * @author me@blackcap.name
+ * @author David Barts <n5jrn@me.com>
  * @since 2017-11-27
  *
  * Per-thread file locking. Not a substutute for per-process locking!

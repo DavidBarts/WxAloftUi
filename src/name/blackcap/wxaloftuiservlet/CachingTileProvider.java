@@ -1,4 +1,4 @@
-package name.blackcap.wxaloftuiservlet;
+package info.koosah.wxaloftuiservlet;
 
 import java.awt.Image;
 import java.awt.image.RenderedImage;
@@ -11,7 +11,7 @@ import java.util.concurrent.locks.Lock;
 import javax.imageio.ImageIO;
 
 /**
- * @author me@blackcap.name
+ * @author n5jrn@me.com
  * @since 2017-11-27
  *
  * A tiles provider that caches another one.

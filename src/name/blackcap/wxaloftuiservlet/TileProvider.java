@@ -1,4 +1,4 @@
-package name.blackcap.wxaloftuiservlet;
+package info.koosah.wxaloftuiservlet;
 
 import javax.imageio.ImageIO;
 import java.awt.Image;
@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.net.URL;
 
 /**
- * @author me@blackcap.name
+ * @author David Barts <n5jrn@me.com>
  * @since 2017-11-27
  *
  * Generic tiles provider

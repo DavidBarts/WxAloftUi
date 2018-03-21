@@ -1,4 +1,4 @@
-package name.blackcap.wxaloftuiservlet;
+package info.koosah.wxaloftuiservlet;
 
 import java.awt.Graphics;
 import java.awt.Image;
@@ -8,7 +8,7 @@ import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static name.blackcap.wxaloftuiservlet.WorldPixel.*;
+import static info.koosah.wxaloftuiservlet.WorldPixel.*;
 
 /**
  * A raster-based map that uses tiles from the OSM tile server. Things that

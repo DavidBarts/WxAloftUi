@@ -1,9 +1,9 @@
 <%@ page contentType="text/html; charset=UTF-8"  %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
-<%@ page language="java" import="name.blackcap.wxaloftuiservlet.ObsDemoBean" %>
+<%@ page language="java" import="info.koosah.wxaloftuiservlet.ObsDemoBean" %>
 <jsp:useBean id="obsDemo"
-  scope="page" class="name.blackcap.wxaloftuiservlet.ObsDemoBean" />
+  scope="page" class="info.koosah.wxaloftuiservlet.ObsDemoBean" />
 <%
   if (!obsDemo.processRequest(request, response))
     return;
