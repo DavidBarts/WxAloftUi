@@ -6,7 +6,8 @@
 <html>
   <head>
     <style type="text/css">
-      body { font-family: Helvetica, Arial, sans-serif }
+      @import url('https://fonts.googleapis.com/css?family=IBM+Plex+Sans:400,400i,700');
+      body { font-family: 'IBM Plex Sans', sans-serif; }
     </style>
     <jsp:invoke fragment="head"/>
   </head>
