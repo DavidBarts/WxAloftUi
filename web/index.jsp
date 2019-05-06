@@ -50,7 +50,7 @@
     <a href="about.jsp">here.</a></p>
 
     <h2>Contact</h2>
-    <p>You can send me a message at <a href="znvygb:a5wea@zr.pbz" id="email">a5wea@zr.pbz</a>
+    <p>You can send me a message at <a href="znvygb:a5wea@zr.pbz" id="email">a5wea@zr.pbz</a>.
     Note that this e-mail address was encoded to protect it from address
     harvesting bots used by spammers. It should have been decoded for you
     automatically. If you see gibberish, it probably means you have
