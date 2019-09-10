@@ -114,5 +114,6 @@
         <td></td>
       </tr>
     </table>
+    <p>Map <a href="https://www.openstreetmap.org/copyright">© OpenStreetMap</a> contributors.</p>
   </jsp:body>
 </webapp:page>
