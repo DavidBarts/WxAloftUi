@@ -22,12 +22,8 @@ abstract public class TileProvider
      */
     public Image getTile(int x, int y, int z) throws IOException
     {
-        String urlString = getTileUrl(x, y, z);
-        try {
-            return ImageIO.read(new URL(urlString));
-        } catch (IOException e) {
-            throw new IOException("Unable to read URL: " + urlString, e);
-        }
+        System.setProperty("http.agent", "WxAloftUi");
+        return ImageIO.read(new URL(getTileUrl(x, y, z)));
     }
 
     /**
