@@ -10,6 +10,8 @@
 %>
 <html>
   <head>
+    <meta content="text/html; charset=utf-8" http-equiv="content-type"/>
+    <meta content="width=device-width" name="viewport"/>
     <title>Observation Details</title>
   </head>
   <body>

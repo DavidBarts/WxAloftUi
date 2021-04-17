@@ -13,6 +13,11 @@ import java.net.URL;
  */
 abstract public class TileProvider
 {
+    public TileProvider()
+    {
+        System.setProperty("http.agent", "WxAloftUi (http://github.com/DavidBarts/WxAloftUi)");
+    }
+
     /**
      * Gets the tile for the specified column, row, and zoom level.
      * @param x         Column

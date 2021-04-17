@@ -4,6 +4,25 @@
   <jsp:attribute name="head">
     <meta charset="utf-8" />
     <title>Koosah.INFO</title>
+    <script type="text/javascript">
+      function mapit(input, output, str) {
+        var index     = x => input.indexOf(x);
+        var translate = x => index(x) > -1 ? output[index(x)] : x;
+        return str.split('').map(translate).join('');
+      }
+      function rot13(str) {
+        return mapit(
+          'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz',
+          'NOPQRSTUVWXYZABCDEFGHIJKLMnopqrstuvwxyzabcdefghijklm',
+          str);
+      }
+      function descramble() {
+        var email = document.getElementById("email");
+        email.setAttribute("href", rot13(email.getAttribute("href")));
+        email.innerHTML = rot13(email.innerHTML);
+      }
+      window.onload = descramble;
+    </script>
   </jsp:attribute>
   <jsp:body>
     <h1>Welcome to Koosah.INFO</h1>
@@ -31,7 +50,12 @@
     <a href="about.jsp">here.</a></p>
 
     <h2>Contact</h2>
-    <p>You can send me a message <a href="contact.jsp">here.</a>
+    <p>You can send me a message at <a href="znvygb:a5wea@zr.pbz" id="email">a5wea@zr.pbz</a>.</p>
+    <p>Note that this e-mail address was encoded to protect it from address
+    harvesting bots used by spammers. It should have been decoded for you
+    automatically. If you see gibberish, it probably means you have
+    JavaScript disabled in your browser. Enable it, and you should see my
+    decoded e-mail address.</p>
 
     <h2>Disclaimer</h2>
     <p><strong>Important:</strong> The information presented on this site is
