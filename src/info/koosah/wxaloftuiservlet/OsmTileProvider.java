@@ -18,6 +18,6 @@ public class OsmTileProvider extends TileProvider
      */
     public String getTileUrl(int x, int y, int z)
     {
-        return String.format("http://tile.openstreetmap.org/%d/%d/%d.png", z, x, y);
+        return String.format("https://tile.openstreetmap.org/%d/%d/%d.png", z, x, y);
     }
 }
