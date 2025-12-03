@@ -55,7 +55,7 @@
 
     <h2>Why the limited coverage?</h2>
     <p>This is a hobby project of mine and I’m just getting started. Currently
-    there’s only one receiving site (at my home, near Seattle). I’ll be
+    there’s only one receiving site (at my home, in Vancouver). I’ll be
     interested in adding more sites in the coming months. If you’re interested
     in hosting one, see next section.</p>
 

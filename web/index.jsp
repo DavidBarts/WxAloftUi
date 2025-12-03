@@ -29,19 +29,19 @@
 
     <h2>What’s Here?</h2>
 
-    <h3><a href="obs.jsp?area=KSEA">Real-Time Upper Atmosphere Weather</a></h3>
+    <h3><a href="obs.jsp?area=CYVR">Real-Time Upper Atmosphere Weather</a></h3>
     <p>This is a map detailing upper-atmosphere weather observations made by
     automated recording equipment aboard commercial aircraft in the
-    Seattle area. It’s interactive; hover the mouse pointer over the colored
+    Vancouver area. It’s interactive; hover the mouse pointer over the colored
     dots that represent observations to see the details of that observation.
 
-    <h3><a href="obsm.jsp?area=KSEA">Mobile Device Version</a></h3>
+    <h3><a href="obsm.jsp?area=CYVR">Mobile Device Version</a></h3>
     <p>This page will probably work better on most mobile devices than the
     previous one. If your device supports hovering, the observation details
     should pop up in tool-tip messages. If not, clicking on the dots will bring
     up the observation details in a separate page.</p>
 
-    <h3><a href="obst.jsp?area=KSEA">All-Text Version</a></h3>
+    <h3><a href="obst.jsp?area=CYVR">All-Text Version</a></h3>
     <p>This is an all-text page that displays the observations in tabular
     format.</p>
 

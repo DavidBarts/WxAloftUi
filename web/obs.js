@@ -1,7 +1,7 @@
 var drawMap = function(obs) {
   var RADIUS = 4;  /* radius of the dots we draw */
   var rsquared = RADIUS * RADIUS;
-  var provider = new com.modestmaps.TemplatedLayer('http://tile.openstreetmap.org/{Z}/{X}/{Y}.png');
+  var provider = new com.modestmaps.TemplatedLayer('https://tile.openstreetmap.org/{Z}/{X}/{Y}.png');
   var map = new com.modestmaps.Map('map', provider);
   var canvas = document.createElement('canvas');
   canvas.id = "mapCanvas";
@@ -134,7 +134,7 @@ var drawMap = function(obs) {
 };
 
 var initMap = function(areaId, since) {
-  var url = "http://" + location.host + "/WxAloftApi/ObsData?area=" + areaId +
+  var url = "https://" + location.host + "/WxAloftApi/ObsData?area=" + areaId +
     "&since=" + since + "&zone=local";
   $.getJSON(url, drawMap)
   .fail(function() { alert("getJson failed!"); });

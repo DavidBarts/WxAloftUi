@@ -42,8 +42,8 @@
     <p><a href="/">Return to main page.</a></p>
 
     <div id="map">
-      <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js" type="text/javascript"></script>
-      <script src="https://rawgithub.com/stamen/modestmaps-js/master/modestmaps.min.js" type="text/javascript"></script>
+      <script src="jquery.min.js" type="text/javascript"></script>
+      <script src="modestmaps.min.js" type="text/javascript"></script>
       <script src="obs.js" type="text/javascript"></script>
     </div>
     <p>Map <a href="https://www.openstreetmap.org/copyright">© OpenStreetMap</a> contributors.</p>
