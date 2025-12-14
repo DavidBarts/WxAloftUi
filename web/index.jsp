@@ -38,8 +38,9 @@
     <h3><a href="obsm.jsp?area=CYVR">Mobile Device Version</a></h3>
     <p>This page will probably work better on most mobile devices (i.e.
     smartphones) than the previous one. If your device supports hovering, the
-    observation details should pop up in tool-tip messages. If not, clicking on
-    the dots will bring up the observation details in a separate page.</p>
+    observation details should pop up in tool-tip messages. If not, clicking or
+    tapping on the dots will bring up the observation details in a separate
+    page.</p>
 
     <h3><a href="obst.jsp?area=CYVR">All-Text Version</a></h3>
     <p>This is an all-text page that displays the observations in tabular

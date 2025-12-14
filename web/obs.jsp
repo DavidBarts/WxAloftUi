@@ -33,6 +33,10 @@
     the dots (color-coded by elevation) to see the details of each
     observation. Use the mouse to pan and zoom.</p>
 
+    <p>If you do not see any colored dots, it means there are no observations
+    with the specified time frame (by default, the last two hours). Try
+    using the selector above the map to go back further in time.</p>
+
     <jsp:include page="obs_since.jsp">
       <jsp:param name="action" value="obs.jsp"/>
       <jsp:param name="since" value="${obs.duration}"/>

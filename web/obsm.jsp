@@ -38,9 +38,13 @@
     <h1><c:out value="${obs.shortArea}"/> Weather Observatons</h1>
     <p>This map shows observations taken by aircraft in the
     <c:out value="${obs.longArea}"/> area since
-    <c:out value="${obs.since}"/>. Hover over or click on
+    <c:out value="${obs.since}"/>. Hover over, click on, or tap on
     the dots (color-coded by elevation) to see the details of each
     observation.</p>
+
+    <p>If you do not see any colored dots, it means there are no observations
+    with the specified time frame (by default, the last two hours). Try
+    using the selector above the map to go back further in time.</p>
 
     <p>This map can be zoomed and panned. Zoom in by clicking on the plus sign
     in the upper-right corner, zoom out by clicking on the minus sign in the
@@ -96,7 +100,7 @@
             class="obsmap" />
           <map name="observations">
             <c:forEach var="observation" items="${obs.observations}">
-              <area shape="circle" coords="${observation.x},${observation.y},${obs.radius}"
+              <area shape="circle" coords="${observation.x},${observation.y},${obs.radius*2}"
                 href="obs_demo_detail.jsp?area=${obs.areaId}&amp;id=${observation.id}"
                 title="${observation.details}" />
             </c:forEach>
