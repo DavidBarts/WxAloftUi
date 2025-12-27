@@ -32,7 +32,7 @@
     <h3><a href="obs.jsp?area=CYVR">Real-Time Upper Atmosphere Weather</a></h3>
     <p>This is a map detailing upper-atmosphere weather observations made by
     automated recording equipment aboard commercial aircraft in the
-    Vancouver area. It’s interactive; hover the mouse pointer over the colored
+    Vancouver area. It’s interactive; hover the mouse pointer over the coloured
     dots that represent observations to see the details of that observation.
 
     <h3><a href="obsm.jsp?area=CYVR">Mobile Device Version</a></h3>
