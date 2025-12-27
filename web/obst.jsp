@@ -19,7 +19,7 @@
   </jsp:attribute>
 
   <jsp:body>
-    <h1><c:out value="${obs.shortArea}"/> Weather Observatons</h1>
+    <h1><c:out value="${obs.shortArea}"/> Weather Observations</h1>
     <p>This table shows observations taken by aircraft in the
     <c:out value="${obs.longArea}"/> area since
     <c:out value="${obs.since}"/>. By default, it is sorted by time observed

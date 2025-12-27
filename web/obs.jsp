@@ -26,14 +26,14 @@
   </jsp:attribute>
 
   <jsp:body>
-    <h1><c:out value="${obs.shortArea}"/> Weather Observatons</h1>
+    <h1><c:out value="${obs.shortArea}"/> Weather Observations</h1>
     <p>This map shows observations taken by aircraft in the
     <c:out value="${obs.longArea}"/> area since
     <c:out value="${obs.since}"/>. Hover over
-    the dots (color-coded by elevation) to see the details of each
+    the dots (colour-coded by elevation) to see the details of each
     observation. Use the mouse to pan and zoom.</p>
 
-    <p>If you do not see any colored dots, it means there are no observations
+    <p>If you do not see any coloured dots, it means there are no observations
     with the specified time frame (by default, the last two hours). Try
     using the selector above the map to go back further in time.</p>
 

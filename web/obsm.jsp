@@ -14,6 +14,7 @@
     <meta charset="utf-8" />
     <title>Koosah.INFO: Aircraft Weather Observations</title>
     <meta name="robots" content="nofollow"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <style type="text/css">
       table, th, td { border: none }
       .left { text-align: left }
@@ -35,14 +36,14 @@
   </jsp:attribute>
 
   <jsp:body>
-    <h1><c:out value="${obs.shortArea}"/> Weather Observatons</h1>
-    <p>This map shows observations taken by aircraft in the
+    <h1><c:out value="${obs.shortArea}"/> Weather Observations</h1>
+    <p>The map below shows observations taken by aircraft in the
     <c:out value="${obs.longArea}"/> area since
     <c:out value="${obs.since}"/>. Hover over, click on, or tap on
-    the dots (color-coded by elevation) to see the details of each
+    the dots (colour-coded by elevation) to see the details of each
     observation.</p>
 
-    <p>If you do not see any colored dots, it means there are no observations
+    <p>If you do not see any coloured dots, it means there are no observations
     with the specified time frame (by default, the last two hours). Try
     using the selector above the map to go back further in time.</p>
 
@@ -51,6 +52,9 @@
     upper-left corner, and pan by clicking on the arrow on the appropriate edge.
     (If you are at a limit, one or more of these operations will be disallowed;
     initially, the only thing you can do is zoom in.)</p>
+
+    <p>If you are on a mobile device, this page is best viewed in landscape
+    mode (i.e. with your phone held sideways).</p>
 
     <c:if test="${(empty param['zoom']) or (sessionScope['zoom'] eq param['zoom'])}">
      <jsp:include page="obs_since.jsp">
