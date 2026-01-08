@@ -58,7 +58,7 @@
 
     <context-param>
       <param-name>cache</param-name>
-      <param-value>/Users/davidb/temp/cache</param-value>
+      <param-value>/home/davidb/tile-cache</param-value>
       <description>Map tiles cache.</description>
     </context-param>
 
