@@ -1,8 +1,9 @@
-<%@ tag description="Overall Page template" pageEncoding="UTF-8"%>
+<%@ tag description="Overall Page template" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <%@ attribute name="onload" %>
 <%@ attribute name="head" fragment="true" %>
+<!DOCTYPE html>
 <html>
   <head>
     <style type="text/css">

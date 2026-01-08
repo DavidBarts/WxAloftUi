@@ -117,6 +117,17 @@
       <res-auth>Container</res-auth>
     </resource-ref>
 
+    <!-- JSP configuration. See:
+         https://stackoverflow.com/questions/208736/strip-whitespace-from-jsp-output
+    -->
+
+    <jsp-config>
+      <jsp-property-group>
+        <url-pattern>*.jsp</url-pattern>
+        <trim-directive-whitespaces>true</trim-directive-whitespaces>
+      </jsp-property-group>
+    </jsp-config>
+
     <!-- Servlet definitions for the servlets that make up
          your web application, including initialization
          parameters.  With Tomcat, you can also send requests
