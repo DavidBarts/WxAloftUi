@@ -8,6 +8,7 @@
   if (!obsDemoDetail.processRequest(request, response))
     return;
 %>
+<!DOCTYPE html>
 <html>
   <head>
     <meta content="text/html; charset=utf-8" http-equiv="content-type"/>
